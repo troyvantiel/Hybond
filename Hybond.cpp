@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <Pyhelp.hpp>
+#include "pyhelp.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -29,7 +29,7 @@ int main()
 
 	Py_Finalize();
 
-	/*
+	
 	char filename[] = "test.py";
 	FILE* fp;
 
@@ -38,14 +38,10 @@ int main()
 	PyRun_SimpleFile(fp,filename);
 
 	Py_Finalize();
-*/
+
 	cout << "This is just before the helper class code" << endl;
 	CPyInstance pyInstance;
 	PyRun_SimpleString("print('Hello World from embedded python!!!')");
-	printf("\nPress any key to exit...\n");
-	if(!_getch()) _getch();
-
-
 
 	return 0;
 } 
