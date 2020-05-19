@@ -4,4 +4,4 @@ print('Hello world from python file')
 def getInteger():
 	print('Python function getInteger() called')
 	c = 100 + 300/60
-	return c
+	return long(c)

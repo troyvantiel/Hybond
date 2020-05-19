@@ -18,7 +18,7 @@
 
 
 using namespace std;
-
+/*
 int main()
 {
 	//Py_SetProgramName(argv[0]);
@@ -26,7 +26,7 @@ int main()
 
 	//cout << "Test" << endl;
 
-	/*
+	
 	Py_Initialize();
 	cout << "Python initialized: " << Py_IsInitialized() << endl;
 	PyRun_SimpleString("print ('Hello World')");
@@ -46,19 +46,19 @@ int main()
 	cout << "This is just before the helper class code" << endl;
 	CPyInstance pyInstance;
 	PyRun_SimpleString("print('Hello World from embedded python!!!')");
-	*/
+	
 
 	cout << "Start of the get integer code" << endl;
 
-	CPyInstance hInstance;
+	//CPyInstance pyInstance;
 
 	CPyObject pName = PyUnicode_FromString("test");
-	CPyObject pModule = PyImport_Import(pName);
+	CPyObject pModu = PyImport_Import(pName);
 
-	if(pModule)
+	if(pModu)
 	{
-		CPyObject pFunc = PyObject_GetAttrString(pModule, "getInteger");
-		if(pFunc && PyCallable_Check(pFunc))
+		CPyObject pFunc = PyObject_GetAttrString(pModu, "getInteger");
+		if(PyCallable_Check(pFunc)==1)
 		{
 			CPyObject pValue = PyObject_CallObject(pFunc, NULL);
 
@@ -76,3 +76,75 @@ int main()
 	}
 	return 0;
 } 
+*/
+int main(int argc , char *argv[])
+{
+	PyObject *pName, *pModule, *pFunc;
+	PyObject *pArgs, *pValue;
+	int i;
+
+	if(argv < 3)
+	{
+		printf(stderr, "Usage: Call python file func name [args]\n");
+		return 1;
+	}
+
+	Py_Initialize();
+	pName = PyString_FromString(argv[1]);
+
+	pModule = PyImport_Import(pName);
+	Py_DECREF(pName);
+
+	if(pModule != NULL) 
+	{
+		pFunc = PyObject_GetAttrString(pModule, argv[2]);
+
+		if(pFunc && PyCallable_Check(pFunc))
+		{
+			pArgs = PyTuple_New(argc - 3);
+			for(i = 0; i < argc - 3; ++i)
+			{
+				pValue = PyInt_FromLong(atoi(argv[i+3]));
+				if(!pValue)
+				{
+					Py_DECREF(pArgs);
+					Py_DECREF(pModule);
+					printf(stderr, "Cannot convert argument\n");
+					return 1;
+				}
+				PyTuple_SetItem(pArgs,i,pValue);
+			}
+			pValue = PyObject_CallObject(pFunc,pArgs);
+			Py_DECREF(pArgs);
+			if(pValue !=NULL)
+			{
+				printf("Result of call: %ld\n", PyInt_AsLong(pValue));
+				Py_DECREF(pValue);
+			}
+			else
+			{
+				Py_DECREF(pFunc);
+				Py_DECREF(pModule);
+				PyErr Print();
+				fprintf(stderr, "Call Failed\n");
+				return 1;
+			}
+		}
+		else
+		{
+			if(PyErr Occurred())
+				PyErr_Print();
+			fprintf(stderr, "Cannot find function \"%s\"\n", argv[2]);
+		}
+		Py_XDECREF(pFunc);
+		Py_DECREF(pModule);
+	}
+	else
+	{
+		PyErr_Print();
+		fprintf(stderr, "Failed to load \"%s\"\n", argv[1]);
+		return 1;
+	}
+	Py_Finalize();
+	return 0;
+}
