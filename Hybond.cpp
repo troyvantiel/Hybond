@@ -1,13 +1,13 @@
-#define PY_SSIZE_T_CLEAN
+//#define PY_SSIZE_T_CLEAN
 
-#include <Python.h>
+//#include <Python.h>
 #include <errno.h>
 #include <limits.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "pyhelp.hpp"
+//#include "pyhelp.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -18,6 +18,51 @@
 
 
 using namespace std;
+
+int main(int argc, char* argv[])
+{
+	/*
+	int len = sizeof(argc)/1;
+	cout << "Length of input array: " << len << endl;
+	if(len > 4)
+	{
+		cout<< "Usage: DCD File input , Output file" << endl;
+		return 1;
+	}*/
+		streampos size;
+		char * memblock;
+
+		ifstream fileBuffer(argv[0], ios::in|ios::binary|ios::ate);
+		cout<< "Made ifstream buffer" << endl;
+		ofstream outputBuffer("output.txt", ios::out|ios::binary);
+		cout<< "Made ofstream buffer" << endl;
+
+		char input[1024];
+		char output[1024];
+
+		if(fileBuffer.is_open())
+		{
+			size = fileBuffer.tellg();
+			memblock = new char[size];
+			fileBuffer.seekg(0, ios::beg);
+			fileBuffer.read(memblock,size);
+		}
+
+		outputBuffer.write((char*)memblock, size);
+		outputBuffer.close();
+		fileBuffer.close();
+		return 0;
+
+}
+
+
+
+
+
+
+//Following code was written to run python scripts to read dcd files but the methods couldnt
+//be run through the C++ code. This means the DCD file could not be passed to the python reader
+//and an output back to the C++ code could not be obtained.
 /*
 int main()
 {
@@ -76,7 +121,7 @@ int main()
 	}
 	return 0;
 } 
-*/
+
 int main(int argc , char *argv[])
 {
 	PyObject *pName, *pModule, *pFunc;
@@ -147,4 +192,5 @@ int main(int argc , char *argv[])
 	}
 	Py_Finalize();
 	return 0;
-}
+}*/
+
