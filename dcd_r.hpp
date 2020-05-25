@@ -1,0 +1,28 @@
+#include "dcd.hpp"
+
+#ifndef DCD_R_HPP
+#define	DCD_R_HPP
+
+class DCD_R : public DCD
+{
+
+private:
+    //no private attributes
+    //private methods
+    void alloc();
+    
+public:
+    
+    // no public attributes
+    // public methods
+    DCD_R(const char filename[]); //constructor
+    
+    void read_header();
+    void read_oneFrame();
+    void printHeader() const;
+        
+    ~DCD_R();
+
+};
+
+#endif	/* DCD_R_HPP */
