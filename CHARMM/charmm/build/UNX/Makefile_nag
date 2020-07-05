@@ -1,0 +1,50 @@
+ # CHARMM 26 makefile for GNU using the NAG fortran compiler
+ROOT = rootdir
+SRC = $(ROOT)/source
+FLX = $(ROOT)/tool/preflx
+GMS = $(ROOT)/tool/gmscomp_gnu
+LIB = $(ROOT)/lib/nag
+EXEC = $(ROOT)/exec/nag
+CC = gcc -Dnographics -O -DCHARMM_GNUC -DLINUX $(I8DUM2)
+# Note that CC on line 8 and GLIB on line 10, sorry
+GLIB =  
+CPP = /bin/cat
+CCPP = g++ -DCHARMM_GNUC
+INCLUDE = 
+ADDLIB = 
+ADDLIB := $(ADDLIB) $(GLIB)
+QLIB =
+ENDIAN =
+RANLIB = ranlib
+.SUFFIXES: .fcm .src .o
+VPATH = fcm
+
+FCOMPILER = nagfor
+ifdef MPI_EM64T
+    FCOMPILER = mpif90
+endif
+CC = gcc -Dnographics -DCHARMM_GNUC -Di8
+
+FC = $(FCOMPILER) -132 -dusty -w
+LD = $(FCOMPILER)  # -static
+
+FC := $(FC) $(INCLUDE)
+
+   FC0 = $(FC) -c -O0 -free
+   FC1 = $(FC) -c -O1 -free
+   FC2 = $(FC) -c -O3 -free 
+   FC3 = $(FC) -c -O4 -free
+   FCR = $(FC) -c -u -V -free
+   FCD = $(FC) -c -g -O0 -free
+ifdef DEBUG
+FC0 = $(FCD)
+FC1 = $(FCD)
+FC2 = $(FCD)
+FC3 = $(FCD)
+LD := $(LD) -g
+endif
+
+include objlibs.mk
+
+$(EXEC)/charmm : $(LIBS) $(OBJS)
+	$(LD) -o charmm.exe $(LIB)/*.o $(LIBS) $(LIBS) $(LIBS) $(ADDLIB) $(QLIB) $(MSGLIB)

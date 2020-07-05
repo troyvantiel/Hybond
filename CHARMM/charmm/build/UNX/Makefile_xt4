@@ -1,0 +1,102 @@
+ # CHARMM 26 makefile for Cray XT4 with Compute Node Linux.
+ROOT = rootdir
+SRC = $(ROOT)/source
+FLX = -$(ROOT)/tool/preflx
+GMS = $(ROOT)/tool/gmscomp_gnu
+GLIB =
+CC = cc -Dnographics -DCHARMM_GNUC 
+CPP = /bin/cat
+CCPP = CC -DCHARMM_GNUC
+INCLUDE = -I.
+ADDLIB =
+ADDLIB := $(ADDLIB) $(GLIB)
+QLIB =
+
+XTPE_LINK_TYPE=dynamic
+
+RANLIB = ranlib
+.SUFFIXES: .fcm .src .o
+VPATH = fcm
+
+# default settings
+FCOMPILER = ftn
+FC := $(FCOMPILER) $(INCLUDE)
+LD := $(FCOMPILER)
+
+#FC0 = $(FC) $(FFLAGS) -c 
+#FC1 = $(FC) $(FFLAGS) -c 
+#FC2 = $(FC) $(FFLAGS) -c 
+#FC3 = $(FC) $(FFLAGS) -c 
+#FCR = $(FC) $(FFLAGS) -c -g 
+#FCD = $(FC) $(FFLAGS) -c -g -O0
+#FCD = $(FC) $(FFLAGS) -c -g -V -O0 
+#LDD = $(FC)
+
+# Compiler specific settings
+
+# PGI
+ifdef PGI_F95
+   FC := $(FCOMPILER) $(INCLUDE) -Mfree -Mbackslash 
+   FC0 = $(FC) $(FFLAGS) -c -O0 
+   FC1 = $(FC) $(FFLAGS) -c -O1 -fastsse -tp shanghai-64
+   FC2 = $(FC) $(FFLAGS) -c -O2 -fastsse -tp shanghai-64
+   FC3 = $(FC) $(FFLAGS) -c -O3 -fastsse -tp shanghai-64
+   FCR = $(FC) $(FFLAGS) -c -g 
+   FCD = $(FC) $(FFLAGS) -c -g 
+   FCRD = $(FC) $(FFLAGS) -c -g -V
+   LDD = $(FC)
+endif
+
+
+# Pathscale
+ifdef PATHSCALE
+   FC := $(FCOMPILER) $(INCLUDE) -intrinsic=flush
+   FC0 = $(FC) $(FFLAGS) -c -O0 -freeform
+   FC1 = $(FC) $(FFLAGS) -c -O1 -freeform
+   FC2 = $(FC) $(FFLAGS) -c -O2 -freeform
+   FC3 = $(FC) $(FFLAGS) -c -O3 -freeform
+   FCR = $(FC) $(FFLAGS) -c -g -freeform
+   FCD = $(FC) $(FFLAGS) -c -g -O0 -freeform
+   FCRD = $(FC) $(FFLAGS) -c -g -V -O0 -freeform
+   LDD = $(FC)
+endif
+
+# Cray Fortran Compiler
+ifdef CRAYFTN
+   FC := $(FCOMPILER) $(INCLUDE) 
+   FC0 = $(FC) $(FFLAGS) -c -O 0 -f free
+   FC1 = $(FC) $(FFLAGS) -c -O 1 -f free
+   FC2 = $(FC) $(FFLAGS) -c -O 2 -f free
+   FC3 = $(FC) $(FFLAGS) -c -O 3 -f free
+   FCR = $(FC) $(FFLAGS) -c -g -f free
+   FCD = $(FC) $(FFLAGS) -c -g -O 0 -f free
+   FCRD = $(FC) $(FFLAGS) -c -g -V -O 0 -f free
+   LDD = $(FC)
+endif
+
+# GNU Fortran compiler
+ifdef GFORTRAN
+   FC := $(FCOMPILER) $(INCLUDE) -DGNU -ffree-form -ffree-line-length-none 
+   FC0 = $(FC) $(FFLAGS) -c -O0
+   FC1 = $(FC) $(FFLAGS) -c -O1
+   FC2 = $(FC) $(FFLAGS) -c -O2
+   FC3 = $(FC) $(FFLAGS) -c -O3
+   FCR = $(FC) $(FFLAGS) -c -g 
+   FCD = $(FC) $(FFLAGS) -c -g -O0  
+   FCRD = $(FC) $(FFLAGS) -c -g -V -O0 
+   LDD = $(FC)
+endif
+
+ifdef DEBUG
+FC0 = $(FCD)
+FC1 = $(FCD)
+FC2 = $(FCD)
+FC3 = $(FCD)
+LD := $(LD) -g
+endif
+
+include objlibs.mk
+
+$(EXEC)/charmm : $(LIBS) $(OBJS)
+	$(LD) -o charmm.exe $(LIB)/*.o $(LIBS) $(LIBS) $(LIBS) $(ADDLIB) $(QLIB)
+

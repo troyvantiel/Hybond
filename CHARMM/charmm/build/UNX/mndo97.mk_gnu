@@ -1,0 +1,11 @@
+# mndo97 makefile
+#
+MNDODIR = $(SRC)/mndint/mndo97q
+
+$(LIB)/mndo97.a: $(MNDODIR)/mndo97.a
+	cp $(MNDODIR)/mndo97.a $(LIB)/mndo97.a
+	@echo mndo97 COMPLETED
+
+$(MNDODIR)/mndo97.a:
+	make -C $(MNDODIR) -f Makefile_qmmm
+

@@ -1,0 +1,107 @@
+ # CHARMM 26 makefile for GNU compilers (Linux or elsewhere)
+ROOT = rootdir
+SRC = $(ROOT)/source
+FLX = $(ROOT)/tool/preflx
+GMS = $(ROOT)/tool/gmscomp_gnu
+CFLAGS = -Dnographics -O -DCHARMM_GNUC -DLINUX $(I8DUM2) 
+CCOMPILER = icc 
+GLIB = grflib
+CPP = /bin/cat
+CUDAC = icc -x c -Dnographics -O -DCHARMM_GNUC -DLINUX $(I8DUM2) -DNOCUDAC
+INCLUDE = 
+ADDLIB = 
+ADDLIB := $(ADDLIB) $(GLIB)
+QLIB = -lstdc++
+ENDIAN =
+RANLIB = ranlib
+.SUFFIXES: .fcm .src .o
+VPATH = fcm
+ifdef BIG_ENDIAN
+ ENDIAN := -convert big_endian
+endif
+
+FCOMPILER = ifort
+ifdef MPI_EM64T
+    ifdef MPIIFORT
+        FCOMPILER = mpiifort
+	CCOMPILER = mpiicc
+    else
+        FCOMPILER = mpif90
+	CCOMPILER = mpicc
+    endif
+endif
+
+ifdef DEBUG
+CFLAGS = -Dnographics -DCHARMM_GNUC -mp1 -xHost -g $(FCDEFINES)
+else
+CFLAGS = -Dnographics -DCHARMM_GNUC -mp1 -O3 -xHost $(FCDEFINES)
+endif
+
+ifdef USEGCC
+ifdef MPI_EM64T
+      CCOMPILER = mpicc
+else
+      CCOMPILER = gcc
+endif
+ifdef DEBUG
+CFLAGS = -Dnographics -DCHARMM_GNUC -g -march=native $(FCDEFINES)
+else
+CFLAGS = -Dnographics -DCHARMM_GNUC -O3 -march=native $(FCDEFINES)
+endif
+CUDAC = gcc -x c -Dnographics -DCHARMM_GNUC -DNOCUDAC
+endif
+
+ifdef USE_CUDAC
+GENCODE_SM30    := -gencode arch=compute_30,code=sm_30
+GENCODE_SM35    := -gencode arch=compute_35,code=sm_35
+GENCODE_PTXS    := -gencode arch=compute_35,code=compute_35
+GENCODE_FLAGS   := $(GENCODE_SM30) $(GENCODE_SM35) $(GENCODE_PTXS)
+ifdef DEBUG
+CUDAC = nvcc -g $(GENCODE_FLAGS)
+else
+CUDAC = nvcc -O3 -fmad=true -use_fast_math $(GENCODE_FLAGS)
+endif
+endif
+
+# Tim Miller: August, 2014
+# the -assume byterecl flag is needed for DIRECT-access I/O (for
+# reservoirs) to maintain compatibility with GCC and PGI compilers.
+# Otherwise, ifort treats record lengths as v4 byte units, see
+# https://software.intel.com/sites/products/documentation/doclib/stdxe/2013/composerxe/compiler/fortran-mac/GUID-9A3C5F33-E7DA-4063-9D93-87A75DFF4369.htm
+# for details
+
+FC = $(FCOMPILER) -132 -align all $(ENDIAN) -heap-arrays 256 -assume byterecl $(FCDEFINES)
+LD = $(FCOMPILER) # -static
+
+FC := $(FC) $(INCLUDE)
+
+CC = $(CCOMPILER) $(CFLAGS)
+CCPP = $(CCOMPILER) $(CFLAGS)
+
+ifdef OPENMP
+   OPENMP_FLAG = -openmp
+   FC := $(FC) $(OPENMP_FLAG)
+   CC := $(CC) $(OPENMP_FLAG)
+   CCPP := $(CCPP) $(OPENMP_FLAG)
+   LD := $(LD) $(OPENMP_FLAG)
+endif
+
+FC0 = $(FC) -c -O0 -free -fp-model strict
+FC1 = $(FC) -c -O1 -free -fp-model strict
+FC2 = $(FC) -c -O3 -mp1 -axSSE4.1 -free -fp-model strict
+FC3 = $(FC) -c -O3 -mp1 -axSSE4.1 -free -fp-model strict
+FCR = $(FC) -c -u -V -free -fp-model strict
+FCD = $(FC) -c -g -O0 -u -traceback -free
+
+ifdef DEBUG
+FC0 = $(FCD)
+FC1 = $(FCD)
+FC2 = $(FCD)
+FC3 = $(FCD)
+LD := $(LD) -g
+endif
+
+include objlibs.mk
+
+$(EXEC)/charmm : $(LIBS) $(OBJS)
+	$(LD) -o charmm.exe $(LIB)/*.o $(LIBS) $(LIBS) $(LIBS) $(ADDLIB) $(QLIB) $(MSGLIB)
