@@ -109,24 +109,24 @@ void DCD_R::read_oneFrame()
 
 	if(QCRYS)
 	{
-		cout<<"QCHRYS count was greater than 0" << endl;
+		//cout<<"QCHRYS count was greater than 0" << endl;
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)pbc,sizeof(double)* 6);
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORTCHECK UNCOMMENT
 	}
 		//X
-	cout <<"Reading co-ordinates" << endl;
-	cout <<"***fortcheck1***"<< endl;
+	//cout <<"Reading co-ordinates" << endl;
+	//cout <<"***fortcheck1***"<< endl;
 	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 	cout<< "fortcheck1: " << fortcheck1<<endl;
-	cout << "*****reading x*****" <<endl;
+	//cout << "*****reading x*****" <<endl;
 	dcdf.read((char*)tmpX,sizeof(float)*siz);	
-	cout << "***fortcheck2***"<<endl;
+	//cout << "***fortcheck2***"<<endl;
 	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-	cout<< "fortcheck2: " << fortcheck2 << endl;
+	//cout<< "fortcheck2: " << fortcheck2 << endl;
 	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-	cout<<"finished getting x co-ords"<<endl; 
+	//cout<<"finished getting x co-ords"<<endl;
 	//Y
 	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 	dcdf.read((char*)tmpY,sizeof(float)*siz);	
@@ -138,13 +138,13 @@ void DCD_R::read_oneFrame()
 	dcdf.read((char*)tmpZ,sizeof(float)*siz);	
 	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
 	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-	cout << "finished reading co-ordinates" <<endl;
+	//cout << "finished reading co-ordinates" <<endl;
 	
 
 
 	if(dcd_first_read)
 	{
-		cout << "memcpy on first read" << endl;
+		//cout << "memcpy on first read" << endl;
 		memcpy(X, tmpX, NATOM*sizeof(float));
 		memcpy(Y, tmpY, NATOM*sizeof(float));
 		memcpy(Z, tmpZ ,NATOM*sizeof(float));
@@ -153,7 +153,7 @@ void DCD_R::read_oneFrame()
 	{
 		if(LNFREAT != NATOM)
 		{
-			cout << "before the for loop to reading xyz" <<endl;
+			//cout << "before the for loop to reading xyz" <<endl;
 			for(int i =0; i < siz; i++)
 			{
 				X[FREEAT[i]-1] = tmpX[i];
@@ -163,7 +163,7 @@ void DCD_R::read_oneFrame()
 		}
 		else
 		{
-			cout<<"memcpy else condition"<<endl;
+			//cout<<"memcpy else condition"<<endl;
 			memcpy(X, tmpX, NATOM*sizeof(float));
 			memcpy(Y, tmpY, NATOM*sizeof(float));
 			memcpy(Z, tmpZ ,NATOM*sizeof(float));
@@ -172,7 +172,7 @@ void DCD_R::read_oneFrame()
 
 	if(dcd_first_read)
 		dcd_first_read=false;
-	cout << "delete temp arrays" <<endl;
+	//cout << "delete temp arrays" <<endl;
 	delete[] tmpX;
 	delete[] tmpY;
 	delete[] tmpZ;
