@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     vector<float> xvectemp (200);
     
     // in this loop the coordinates are read frame by frame
-    for(int i=0;i< 500;i++)
+    for(int i=0;i < 4;i++)
     {
         //cout<< "Getting Frame: " << i << endl;
         dcdf.read_oneFrame();
@@ -70,9 +70,15 @@ int main(int argc, char* argv[])
             for(int k = 0; k < 5; k++)
             {
                 //cout <<"Starting the difference calculation" << endl;
-                cout << "x coordinates of atom: " << k << "  :  " << xvec[k] << endl;
-                cout << "X cocrdinates from last frame" << xvectemp[1] << endl;
-                cout << "Difference from last frame: " << xvec[k] - xvectemp[k] << endl;
+                cout << "x coordinates of atom:" << k << " :      " << xvec[k] << endl;
+                cout << "X cocrdinates from last frame: " << xvectemp[k] << endl;
+                double diff = xvec[k] - xvectemp[k];
+                if(diff<0)
+                {
+                	diff = diff *-1;//keep all differences positive values
+                }
+                cout << "Difference from last frame:    " << diff << endl;
+                cout << " " << endl;
                 //xvectemp = xvec;
                 //copy(tempx, x+100, tempx.begin())
             }
