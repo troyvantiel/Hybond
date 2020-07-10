@@ -26,6 +26,10 @@ int main(int argc, char* argv[])
     dcdf.read_header();
     dcdf.printHeader();
     
+    double xdiff = 0;
+    double zdiff = 0;
+    double ydiff = 0;
+
     int numFrames = dcdf.getNFILE();
     const float *x,*y,*z, *tempx;
     vector<float> xvec (numFrames);
@@ -36,7 +40,7 @@ int main(int argc, char* argv[])
     vector<float> yvectemp (numFrames);
     
     // in this loop the coordinates are read frame by frame
-    for(int i=0;i < 4;i++)
+    for(int i=0; i < numFrames; i++)
     {
 
 
@@ -54,7 +58,7 @@ int main(int argc, char* argv[])
 
 
         // for loop to copy data into a vector for ease of management
-        for(int u = 0; u < 200; u++)
+        for(int u = 0; u < numFrames; u++)
         {
             //cout << "starting array copy of: " << x[u] << endl;
             xvec.at(u) = x[u];
@@ -71,7 +75,7 @@ int main(int argc, char* argv[])
             //tempx = copy(x, tempx);
             //copy(tempx, x+100, tempx.begin())
             //xvectemp = xvec;
-            for (int k = 0; k < 5; k++)
+            for (int k = 0; k < numFrames; k++)
             {
                 cout << "x coordinates of atom: " << k << "  :  " << xvec[k] << endl;
             }
@@ -79,27 +83,45 @@ int main(int argc, char* argv[])
         else
         {
 
-            for(int k = 0; k < 5; k++)
+            for(int k = 0; k < numFrames; k++)
             {
                 //cout <<"Starting the difference calculation" << endl;
                 cout << "x coordinates of atom:" << k << " :      " << xvec[k] << endl;
                 cout << "X cocrdinates from last frame: " << xvectemp[k] << endl;
-                double diff = xvec[k] - xvectemp[k];
-                if(diff < 0)
+
+                xdiff = xvec[k] - xvectemp[k];
+                zdiff = zvec[k] - zvectemp[k];
+                ydiff = yvec[k] - yvectemp[k];
+
+                if(xdiff < 0)
                 {
-                	diff = diff * -1;//keep all differences positive values
+                	xdiff = xdiff * -1;//keep all differences positive values
                 }
-                cout << "Difference from last frame:    " << diff << endl;
+                if(zdiff < 0)
+                {
+                	zdiff = zdiff * -1;//keep all differences positive values
+                }
+                if(ydiff < 0)
+                {
+                	ydiff = ydiff * -1;//keep all differences positive values
+                }
+
+
+                cout << "Difference in X from last frame:    " << xdiff << endl;
+                cout << "Difference in Y from last frame:    " << ydiff << endl;
+                cout << "Difference in Z from last frame:    " << zdiff << endl;
                 cout << " " << endl;
                 //xvectemp = xvec;
                 //copy(tempx, x+100, tempx.begin())
             }
         }
 
-        for(int b = 0; b < 200; b++)
+        for(int b = 0; b < numFrames; b++)
         {
             //cout << "starting temp array copy of: " << x[b] << endl;
             xvectemp.at(b) = x[b];
+            zvectemp.at(b) = z[b];
+            yvectemp.at(b) = z[b];
             //cout << "Temp data that was copied in: " << xvectemp.at(b) << endl;
         }
 
