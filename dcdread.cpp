@@ -189,6 +189,17 @@ void DCD_R::printHeader() const
     
     cout << "HDR :\t" << HDR << endl;
     
+
+    cout << "ICNTRL at index 0 = Number of Frames" << endl;
+    cout << "ICNTRL at index 1 = if restart, total number of frames before first print " << endl;
+    cout << "ICNTRL at index 2 = frequency of writing dcd" << endl;
+    cout << "ICNTRL at index 3 = Number of steps ; note: steps/freq = no of frames" << endl;
+    cout << "ICNTRL at index 7 = Number of degrees of freedom" << endl;
+    cout << "ICNTRL at index 8 = Is number of free atoms" << endl;
+    cout << "ICNTRL at index 9 = timestep in AKMA units" << endl;
+    cout << "ICNTRL at index 10 = is 1 if CRYSTAL used" << endl;
+    cout << "ICNTRL at index 19 = CHARMM version" << endl;
+
     cout << "ICNTRL :\t";
     for(i=0;i<20;i++)
         cout << ICNTRL[i] << "\t" ;
