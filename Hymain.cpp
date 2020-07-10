@@ -19,9 +19,22 @@ int main(int argc, char* argv[])
 	int atom1 = 0;
 	int atom2 = 0;
 
+	//Get the user input for the dcd file and the atoms that want exploring
+	cout << "Name of .dcd file you want to process: " <<endl;
+	cin >> file;
+	cout <<"Number of first atom for analysis:" << endl;
+	cin >> atom1;
+	cout << "Number of second atom for analysis:" << endl;
+	cin >> atom2;
 
-	DCD_R dcdf("newmd.dcd");
-    
+	cout << "Variables are as follows: " << file << " ### " << atom1 << " ### " << atom2 << " ### " << endl;
+
+	const char * filename = file.c_str();
+	//filename = file;
+	//DCD_R dcdf("newmd.dcd");
+    DCD_R dcdf(filename);
+
+
     // read the header and print it
     dcdf.read_header();
     dcdf.printHeader();

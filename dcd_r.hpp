@@ -16,6 +16,7 @@ public:
     // no public attributes
     // public methods
     DCD_R(const char filename[]); //constructor
+    //DCD_R(string filename);
     
     void read_header();
     void read_oneFrame();
