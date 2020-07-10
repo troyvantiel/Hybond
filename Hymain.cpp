@@ -137,3 +137,28 @@ int main(int argc, char* argv[])
     
     return EXIT_SUCCESS;
 }
+
+class DifferenceClass {
+	public:
+		void DifferenceCalculation()
+		{
+			//code for running difference calculation goes here
+		}
+
+};
+
+//calling method exmaple:
+	//int main()
+	//{
+		//DifferenceClass MyDiff;            //Creating an object of the class
+		//MyDiff.DifferenceCalculation();	 //Calling the method with any inputs
+		//return 0;
+	//}
+
+
+
+
+
+
+
+
