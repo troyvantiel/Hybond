@@ -19,8 +19,29 @@
 
 using namespace std;
 
+
+struct Coord
+{
+	double x;
+	double y;
+	double z;
+
+};
+
+
+
 int main(int argc, char* argv[])
 {
+
+	Coord atom;
+	atom.x = 10.7;
+	atom.y = 11.6;
+	atom.z = 12.4;
+
+	cout << atom.x << endl;
+	cout << atom.z << endl;
+	cout << atom.y << endl;
+}
 	/*
 	int len = sizeof(argc)/1;
 	cout << "Length of input array: " << len << endl;
@@ -28,7 +49,7 @@ int main(int argc, char* argv[])
 	{
 		cout<< "Usage: DCD File input , Output file" << endl;
 		return 1;
-	}*/
+	}
 		streampos size;
 		char * memblock;
 
@@ -54,7 +75,7 @@ int main(int argc, char* argv[])
 		return 0;
 
 }
-
+*/
 
 
 
