@@ -29,8 +29,33 @@ void OutputFrametoFile(vector<float> x, vector<float> y , vector<float> z)
 
 }
 
-void DifferenceCalculation(const float* x, const float* y, const float* z, int numFrames, int currentFrame)
+vector<Coords> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame)
 {
+
+	double xdiff = 0;
+	double zdiff = 0;
+	double ydiff = 0;
+
+	if (currentFrame == 0)
+	{
+		cout << "Current Frame is 0" << endl;
+		for (int k = 0; k < numFrames; k++)
+		{
+			cout << "Current atoms Coordinates: X:" << atoms[k].x << "Y:" << atoms[k].y << "Z:" << atoms[k].z << endl;
+		}
+	}
+	else
+	{
+		for (int j = 1; j < numFrames; j++)
+		{
+			cout << "Starting the difference calculation" << endl;
+			cout << "Current atoms Coordinates: X:" << atoms[j].x << "Y:" << atoms[j].y << "Z:" << atoms[j].z << endl;
+		}
+	}
+
+	return atoms;
+
+	/*
     vector<float> xvec (numFrames);
     vector<float> zvec (numFrames);
     vector<float> yvec (numFrames);		//set up vectors to store all the data points from the frames
@@ -102,6 +127,7 @@ void DifferenceCalculation(const float* x, const float* y, const float* z, int n
 	            yvectemp.at(b) = yvec[b];
 	            cout << "Temp data that was copied in: " << xvectemp.at(b) << endl;
 	        }
+	        */
 }
 
 int main(int argc, char* argv[])
@@ -133,6 +159,7 @@ int main(int argc, char* argv[])
     int numFrames = dcdf.getNFILE(); //get the number of frames from the header to read in
     const float *x,*y,*z; //make the const float varibles to store the coordinates.
     Coord atom;
+    vector<Coord> atomsvec (numFrames);
     // in this loop the coordinates are read frame by frame
     for(int i=0; i < numFrames; i++)
     {
@@ -151,7 +178,7 @@ int main(int argc, char* argv[])
         z = dcdf.getZ();
 
         //change the x,y,z coordinates into an atom struct that holds all that data
-        vector<Coord> atomsvec (numFrames);
+
 
         for(int k = 0; k < numFrames; k++)
         {
