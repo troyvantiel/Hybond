@@ -29,7 +29,7 @@ void OutputFrametoFile(vector<float> x, vector<float> y , vector<float> z)
 
 }
 
-vector<Coords> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame)
+vector<Coords> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom)
 {
 
 	double xdiff = 0;
@@ -50,6 +50,27 @@ vector<Coords> DifferenceCalculation(vector<Coord> atoms, int numFrames, int cur
 		{
 			cout << "Starting the difference calculation" << endl;
 			cout << "Current atoms Coordinates: X:" << atoms[j].x << "Y:" << atoms[j].y << "Z:" << atoms[j].z << endl;
+			cout << "Last atoms Coordinates: X:" << prevatom[j].x << "Y:" << prevatom[j].y << "Z:" << prevatom[j].z << endl;
+			xdiff = atoms[j].x - prevatom[j].x;
+			ydiff = atoms[j].y - prevatom[j].y;
+			zdiff = atoms[j].z - prevatom[j].z;
+
+			if(xdiff < 0)
+			{
+				xdiff = xdiff * -1;//keep all differences positive values
+			}
+			else if(zdiff < 0)
+			{
+				zdiff = zdiff * -1;//keep all differences positive values
+			}
+			else if(ydiff < 0)
+			{
+				ydiff = ydiff * -1;//keep all differences positive values
+			}
+            cout << "Difference in X from last frame:    " << xdiff << endl;
+            cout << "Difference in Y from last frame:    " << ydiff << endl; //display all the differences
+            cout << "Difference in Z from last frame:    " << zdiff << endl;
+            cout << " " << endl;
 		}
 	}
 
@@ -160,6 +181,7 @@ int main(int argc, char* argv[])
     const float *x,*y,*z; //make the const float varibles to store the coordinates.
     Coord atom;
     vector<Coord> atomsvec (numFrames);
+    vector<Coord> lastvec (numFrames);
     // in this loop the coordinates are read frame by frame
     for(int i=0; i < numFrames; i++)
     {
@@ -191,6 +213,7 @@ int main(int argc, char* argv[])
 
 
         //Start moving from here and call the function from here
+        lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
 
         //frame counter
         cout << "For frame " << i << endl;
