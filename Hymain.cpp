@@ -8,10 +8,14 @@
 #include <vector>
 
 #include "array_tools.hpp"
-
 #include "dcd_r.hpp"
 
 using namespace std;
+
+
+ofstream frameFile;
+ofstream Diffoutput;
+
 
 struct Coord
 {
@@ -20,13 +24,26 @@ struct Coord
 	double z;
 };
 
-void OutputDifferencetoFile(){}
-
-void OutputFrametoFile(vector<float> x, vector<float> y , vector<float> z)
+void OutputDifferencetoFile(double xdiff, double ydiff, double zdiff, int frameCount)
 {
-	ofstream frameFile;
-	frameFile.open ("Frames.txt");
+	Diffoutput << "Difference in Frames:" << frameCount-1 << " and: " << frameCount << endl;
+	Diffoutput << xdiff << ydiff << zdiff << endl;
 
+}
+
+void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
+{
+
+	 //all writing needs to happen after the open and before the close.
+
+	frameFile << "Current Frame Printed: " << frameCount << endl;
+	for(int i = 0; i < numAtoms; i++)
+	{
+		frameFile << atom[i].x << "," << atom[i].y << "," << atom[i].z << endl; //output coords of atoms in current frame to the file
+	}
+
+	//cout << "Frame outputted to file" << endl;
+	//frameFile.close();
 }
 
 vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom)
@@ -38,19 +55,19 @@ vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int curr
 
 	if (currentFrame == 0)
 	{
-		cout << "Current Frame is 0" << endl;
+		//cout << "Current Frame is 0" << endl;
 		for (int k = 0; k < numFrames; k++)
 		{
-			cout << "Current atoms Coordinates: X:" << atoms[k].x << "Y:" << atoms[k].y << "Z:" << atoms[k].z << endl;
+			//cout << "Current atoms Coordinates: X:" << atoms[k].x << "Y:" << atoms[k].y << "Z:" << atoms[k].z << endl;
 		}
 	}
 	else
 	{
 		for (int j = 1; j < numFrames; j++)
 		{
-			cout << "Starting the difference calculation" << endl;
-			cout << "Current atoms Coordinates: X:" << atoms[j].x << "Y:" << atoms[j].y << "Z:" << atoms[j].z << endl;
-			cout << "Last atoms Coordinates: X:" << prevatom[j].x << "Y:" << prevatom[j].y << "Z:" << prevatom[j].z << endl;
+			//cout << "Starting the difference calculation" << endl;
+			//cout << "Current atoms Coordinates: X:" << atoms[j].x << "Y:" << atoms[j].y << "Z:" << atoms[j].z << endl;
+			//cout << "Last atoms Coordinates: X:" << prevatom[j].x << "Y:" << prevatom[j].y << "Z:" << prevatom[j].z << endl;
 			xdiff = atoms[j].x - prevatom[j].x;
 			ydiff = atoms[j].y - prevatom[j].y;
 			zdiff = atoms[j].z - prevatom[j].z;
@@ -67,10 +84,11 @@ vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int curr
 			{
 				ydiff = ydiff * -1;//keep all differences positive values
 			}
-            cout << "Difference in X from last frame:    " << xdiff << endl;
-            cout << "Difference in Y from last frame:    " << ydiff << endl; //display all the differences
-            cout << "Difference in Z from last frame:    " << zdiff << endl;
-            cout << " " << endl;
+			OutputDifferencetoFile(xdiff,ydiff,zdiff,currentFrame);
+            //cout << "Difference in X from last frame:    " << xdiff << endl;
+            //cout << "Difference in Y from last frame:    " << ydiff << endl; //display all the differences
+            //cout << "Difference in Z from last frame:    " << zdiff << endl;
+            //cout << " " << endl;
 		}
 	}
 
@@ -178,10 +196,14 @@ int main(int argc, char* argv[])
     dcdf.read_header();
     dcdf.printHeader();
     int numFrames = dcdf.getNFILE(); //get the number of frames from the header to read in
+    int nAtom = dcdf.getNATOM();
     const float *x,*y,*z; //make the const float varibles to store the coordinates.
     Coord atom;
     vector<Coord> atomsvec (numFrames);
     vector<Coord> lastvec (numFrames);
+
+    frameFile.open ("Frames.txt"); // open file to be used by the frame output
+	Diffoutput.open("DiffOut.txt");
     // in this loop the coordinates are read frame by frame
     for(int i=0; i < numFrames; i++)
     {
@@ -202,7 +224,7 @@ int main(int argc, char* argv[])
         //change the x,y,z coordinates into an atom struct that holds all that data
 
 
-        for(int k = 0; k < numFrames; k++)
+        for(int k = 0; k < nAtom; k++)
         {
         	atom.x = x[k];
         	atom.y = y[k];
@@ -215,8 +237,17 @@ int main(int argc, char* argv[])
         //Start moving from here and call the function from here
         lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
 
+
+
+        OutputFrametoFile(atomsvec, i, nAtom);
+
+
+
+
+
+
         //frame counter
-        cout << "For frame " << i << endl;
+        cout << "Finished frame: " << i << endl;
 
         //final print of header for additional information
         dcdf.printHeader();
@@ -224,7 +255,8 @@ int main(int argc, char* argv[])
         /* ... */
         
     }
-    
+    frameFile.close(); // close the frame output file to stop any bugs
+	Diffoutput.close();
     return EXIT_SUCCESS;
 }
 
