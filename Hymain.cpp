@@ -18,7 +18,7 @@ struct Coord
 	double x;
 	double y;
 	double z;
-}
+};
 
 void OutputDifferencetoFile(){}
 
@@ -29,7 +29,7 @@ void OutputFrametoFile(vector<float> x, vector<float> y , vector<float> z)
 
 }
 
-vector<Coords> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom)
+vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom)
 {
 
 	double xdiff = 0;
