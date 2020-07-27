@@ -28,7 +28,7 @@ struct Coord
 void OutputDifferencetoFile(double xdiff, double ydiff, double zdiff, int frameCount)
 {
 	Diffoutput << "Difference in Frames:" << frameCount-1 << " and: " << frameCount << endl;
-	Diffoutput << xdiff << ydiff << zdiff << endl;
+	Diffoutput << xdiff << ydiff << zdiff << endl; //outputting the differences to a file
 
 }
 
@@ -40,7 +40,7 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 	frameFile << "Current Frame Printed: " << frameCount << endl;
 	for(int i = 0; i < numAtoms; i++)
 	{
-		if(atom[i].x != 0 && atom[i].y != 0 && atom[i].z) //stop zeros beinng written to file
+		if(atom[i].x != 0 && atom[i].y != 0 && atom[i].z) //stop zeros beinng written to file (vector is filled up with 0,0,0)
 		{
 			frameFile << atom[i].x << " " << atom[i].y << " " << atom[i].z << endl; //output coords of atoms in current frame to the file
 		}
@@ -74,7 +74,7 @@ vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int curr
 			//cout << "Current atoms Coordinates: X:" << atoms[j].x << "Y:" << atoms[j].y << "Z:" << atoms[j].z << endl;
 			//cout << "Last atoms Coordinates: X:" << prevatom[j].x << "Y:" << prevatom[j].y << "Z:" << prevatom[j].z << endl;
 			xdiff = atoms[j].x - prevatom[j].x;
-			ydiff = atoms[j].y - prevatom[j].y;
+			ydiff = atoms[j].y - prevatom[j].y; //calculating all the differences of the atoms from the previous frame
 			zdiff = atoms[j].z - prevatom[j].z;
 
 			if(xdiff < 0)
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 
 	cout << "Number of atoms in the system: " << nAtom << endl;
 	cout <<"Number of first atom for analysis:" << endl;
-	cin >> atom1;
+	cin >> atom1;												//select the atoms to be looked at in the analysis
 	cout << "Number of second atom for analysis:" << endl;
 	cin >> atom2;
 
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
     const float *x,*y,*z; //make the const float varibles to store the coordinates.
     Coord atom;
     vector<Coord> atomsvec (numFrames);
-    vector<Coord> lastvec (numFrames);
+    vector<Coord> lastvec (numFrames); //make the vectors to store all the information
     vector<Coord> refinedVec (numFrames);
 
     frameFile.open ("Frames.txt"); // open file to be used by the frame output
@@ -232,8 +232,6 @@ int main(int argc, char* argv[])
         z = dcdf.getZ();
 
         //change the x,y,z coordinates into an atom struct that holds all that data
-
-
         for(int k = 0; k < nAtom; k++)
         {
         	atom.x = x[k];
@@ -252,21 +250,21 @@ int main(int argc, char* argv[])
         	Coord tempAtom = atomsvec.at(l);
 
         	double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x);
-         	double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y);
+         	double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y); //finding the squared difference of each x y z for both the selected atoms
         	double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z);
 
         	double ssqx = (secondAtom.x - tempAtom.x) * (secondAtom.x - tempAtom.x);
         	double ssqy = (secondAtom.y - tempAtom.y) * (secondAtom.y - tempAtom.y);
         	double ssqz = (secondAtom.z - tempAtom.z) * (secondAtom.z - tempAtom.z);
 
-        	double firstDist = sqrt((fsqx) + (fsqy) + (fsqz));
+        	double firstDist = sqrt((fsqx) + (fsqy) + (fsqz)); //calculating the distance the atom is from the selected ones
         	double secondDist = sqrt((ssqx) +(ssqy) + (ssqz));
 
-        	if(firstDist <= 5 || secondDist <= 5)
+        	if(firstDist <= 5 || secondDist <= 5) //filtering out all the needed atoms
         	{
-        		refinedVec.at(0) = atomsvec.at(atom1);
+        		refinedVec.at(0) = atomsvec.at(atom1); //adding the original picked atoms before the rest of the considered atoms
         		refinedVec.at(1) = atomsvec.at(atom2);
-        		refinedVec.at(dataAdd) = atomsvec.at(l);
+        		refinedVec.at(dataAdd) = atomsvec.at(l); //adding the new atom that is also to be considered in the future calculations
         		dataAdd ++;
         	}
         }
@@ -275,7 +273,7 @@ int main(int argc, char* argv[])
         lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
 
 
-
+        //outputting the frame to the file with the new atoms that have been filtered out by distance
         OutputFrametoFile(refinedVec, i, nAtom);
 
 
