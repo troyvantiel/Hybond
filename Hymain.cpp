@@ -39,7 +39,7 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 	frameFile << "Current Frame Printed: " << frameCount << endl;
 	for(int i = 0; i < numAtoms; i++)
 	{
-		frameFile << atom[i].x << "," << atom[i].y << "," << atom[i].z << endl; //output coords of atoms in current frame to the file
+		frameFile << atom[i].x << " " << atom[i].y << " " << atom[i].z << endl; //output coords of atoms in current frame to the file
 	}
 
 	//cout << "Frame outputted to file" << endl;
@@ -179,12 +179,6 @@ int main(int argc, char* argv[])
 	//Get the user input for the dcd file and the atoms that want exploring
 	cout << "Name of .dcd file you want to process: " <<endl;
 	cin >> file;
-	cout <<"Number of first atom for analysis:" << endl;
-	cin >> atom1;
-	cout << "Number of second atom for analysis:" << endl;
-	cin >> atom2;
-
-	cout << "Variables are as follows: " << file << " ### " << atom1 << " ### " << atom2 << " ### " << endl;
 
 	const char * filename = file.c_str(); //convert the filename into a string
 	//filename = file;
@@ -197,6 +191,16 @@ int main(int argc, char* argv[])
     dcdf.printHeader();
     int numFrames = dcdf.getNFILE(); //get the number of frames from the header to read in
     int nAtom = dcdf.getNATOM();
+
+	cout << "Number of atoms in the system: " << nAtom << endl;
+	cout <<"Number of first atom for analysis:" << endl;
+	cin >> atom1;
+	cout << "Number of second atom for analysis:" << endl;
+	cin >> atom2;
+
+	cout << "Variables are as follows: " << file << " ### " << atom1 << " ### " << atom2 << " ### " << endl;
+
+
     const float *x,*y,*z; //make the const float varibles to store the coordinates.
     Coord atom;
     vector<Coord> atomsvec (numFrames);
