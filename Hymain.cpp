@@ -2,6 +2,7 @@
 #include <iostream>
 #include <signal.h>
 #include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
 #include <fstream>
 #include <algorithm>
@@ -205,6 +206,7 @@ int main(int argc, char* argv[])
     Coord atom;
     vector<Coord> atomsvec (numFrames);
     vector<Coord> lastvec (numFrames);
+    vector<Coord> refinedVec (numFrames);
 
     frameFile.open ("Frames.txt"); // open file to be used by the frame output
 	Diffoutput.open("DiffOut.txt");
@@ -237,53 +239,38 @@ int main(int argc, char* argv[])
         	atomsvec.at(k) = atom;
         }
 
-        int atomcheckx = 0;
-        int atomchecky = 0; //variables for storing the data of the first atom that was picked
-        int atomcheckz = 0;
-
-        int atom2checkx = 0;
-        int atom2checky = 0; //variables for storing the data of the second atom that was picked
-        int atom2checkz = 0;
-
-        int atomtempx = 0;
-        int atomtempy = 0; //variables for the atom that is being checked against
-        int atomtempz = 0;
-
-        atomsvec.at(atom1).x = atomcheckx;
-        atomsvec.at(atom1).y = atomchecky; //setting the variables for the first atom
-        atomsvec.at(atom1).z = atomcheckz;
-
-        atomsvec.at(atom2).x = atom2checkx;
-        atomsvec.at(atom2).y = atom2checky; //setting the variables for the second atom
-        atomsvec.at(atom2).z = atom2checkz;
-
-
-        for(int l = 0; l < nAtoms; l++)
+        //calculate the distance between the selected atoms and the atoms in the molecule using Euclidean Distance
+        Coord firstAtom = atomsvec.at(atom1);
+        Coord secondAtom = atomsvec.at(atom2);
+        int dataAdd = 0;
+        for(int l = 0; l < nAtom; l++)
         {
-        	if(l == atom1 || l == atom2) //skip the atoms that were picked
+        	Coord tempAtom = atomsvec.at(l);
+
+        	double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x)
+         	double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y)
+        	double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z)
+
+        	double ssqx = (secondAtom.x - tempAtom.x) * (secondAtom.x - tempAtom.x)
+        	double ssqy = (secondAtom.y - tempAtom.y) * (secondAtom.y - tempAtom.y)
+        	double ssqz = (secondAtom.z - tempAtom.z) * (secondAtom.z - tempAtom.z)
+
+        	double firstDist = sqrt((fsqx) + (fsqy) + (fsqz));
+        	double secondDist = sqrt((ssqx) +(ssqy) + (ssqz));
+
+        	if(firstDist <= 5 || secondDist <= 5)
         	{
-        		cout << "can't compare the atoms picked" << endl;
+        		refinedVec.at(dataAdd) = atomsvec.at(l)
+        		dataAdd ++;
         	}
-        	else
-        	{
-            	atomtempx = atomsvec.at(l).x;
-            	atomtempy = atomsvec.at(l).y; //setting the variables of the atom being tested
-            	atomtempz = atomsvec.at(l).z;
-
-
-            	if(atomcheckx - atomtempx > 5)
-            	{
-
-            	}
-        	}
-
         }
+
         //Start moving from here and call the function from here
         lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
 
 
 
-        OutputFrametoFile(atomsvec, i, nAtom);
+        OutputFrametoFile(refinedVec, i, nAtom);
 
 
 
