@@ -40,7 +40,11 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 	frameFile << "Current Frame Printed: " << frameCount << endl;
 	for(int i = 0; i < numAtoms; i++)
 	{
-		frameFile << atom[i].x << " " << atom[i].y << " " << atom[i].z << endl; //output coords of atoms in current frame to the file
+		if(atom[i].x != 0 && atom[i].y != 0 && atom[i].z) //stop zeros beinng written to file
+		{
+			frameFile << atom[i].x << " " << atom[i].y << " " << atom[i].z << endl; //output coords of atoms in current frame to the file
+		}
+
 	}
 
 	//cout << "Frame outputted to file" << endl;
@@ -242,25 +246,27 @@ int main(int argc, char* argv[])
         //calculate the distance between the selected atoms and the atoms in the molecule using Euclidean Distance
         Coord firstAtom = atomsvec.at(atom1);
         Coord secondAtom = atomsvec.at(atom2);
-        int dataAdd = 0;
+        int dataAdd = 2;
         for(int l = 0; l < nAtom; l++)
         {
         	Coord tempAtom = atomsvec.at(l);
 
-        	double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x)
-         	double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y)
-        	double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z)
+        	double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x);
+         	double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y);
+        	double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z);
 
-        	double ssqx = (secondAtom.x - tempAtom.x) * (secondAtom.x - tempAtom.x)
-        	double ssqy = (secondAtom.y - tempAtom.y) * (secondAtom.y - tempAtom.y)
-        	double ssqz = (secondAtom.z - tempAtom.z) * (secondAtom.z - tempAtom.z)
+        	double ssqx = (secondAtom.x - tempAtom.x) * (secondAtom.x - tempAtom.x);
+        	double ssqy = (secondAtom.y - tempAtom.y) * (secondAtom.y - tempAtom.y);
+        	double ssqz = (secondAtom.z - tempAtom.z) * (secondAtom.z - tempAtom.z);
 
         	double firstDist = sqrt((fsqx) + (fsqy) + (fsqz));
         	double secondDist = sqrt((ssqx) +(ssqy) + (ssqz));
 
         	if(firstDist <= 5 || secondDist <= 5)
         	{
-        		refinedVec.at(dataAdd) = atomsvec.at(l)
+        		refinedVec.at(0) = atomsvec.at(atom1);
+        		refinedVec.at(1) = atomsvec.at(atom2);
+        		refinedVec.at(dataAdd) = atomsvec.at(l);
         		dataAdd ++;
         	}
         }
