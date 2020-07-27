@@ -237,7 +237,47 @@ int main(int argc, char* argv[])
         	atomsvec.at(k) = atom;
         }
 
+        int atomcheckx = 0;
+        int atomchecky = 0; //variables for storing the data of the first atom that was picked
+        int atomcheckz = 0;
 
+        int atom2checkx = 0;
+        int atom2checky = 0; //variables for storing the data of the second atom that was picked
+        int atom2checkz = 0;
+
+        int atomtempx = 0;
+        int atomtempy = 0; //variables for the atom that is being checked against
+        int atomtempz = 0;
+
+        atomsvec.at(atom1).x = atomcheckx;
+        atomsvec.at(atom1).y = atomchecky; //setting the variables for the first atom
+        atomsvec.at(atom1).z = atomcheckz;
+
+        atomsvec.at(atom2).x = atom2checkx;
+        atomsvec.at(atom2).y = atom2checky; //setting the variables for the second atom
+        atomsvec.at(atom2).z = atom2checkz;
+
+
+        for(int l = 0; l < nAtoms; l++)
+        {
+        	if(l == atom1 || l == atom2) //skip the atoms that were picked
+        	{
+        		cout << "can't compare the atoms picked" << endl;
+        	}
+        	else
+        	{
+            	atomtempx = atomsvec.at(l).x;
+            	atomtempy = atomsvec.at(l).y; //setting the variables of the atom being tested
+            	atomtempz = atomsvec.at(l).z;
+
+
+            	if(atomcheckx - atomtempx > 5)
+            	{
+
+            	}
+        	}
+
+        }
         //Start moving from here and call the function from here
         lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
 
