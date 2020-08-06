@@ -37,7 +37,7 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 
 	 //all writing needs to happen after the open and before the close.
 
-	frameFile << "Current Frame Printed: " << frameCount << endl;
+	//frameFile << "Current Frame Printed: " << frameCount << endl;
 	for(int i = 0; i < numAtoms; i++)
 	{
 		if(atom[i].x != 0 && atom[i].y != 0 && atom[i].z) //stop zeros beinng written to file (vector is filled up with 0,0,0)
