@@ -36,15 +36,26 @@ void DCD_R::alloc()
 	Z = new float[NATOM];
 	pbc[0] = pbc[1] = pbc[2] = pbc[3] = pbc[4]= pbc[5] = 0.0;
 }
-void DCD_R::read_header()
+void DCD_R::read_header(char check)
 {
 	unsigned int fortcheck1, fortcheck2;
 
-	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
-	dcdf.read((char*)HDR,sizeof(char)*4);
-	dcdf.read((char*)ICNTRL,sizeof(int)*20);
-	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));			//FORT CHECK NEEDS UNCOMMENT
-	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+	if(check == 'C') //check for which software package made the dcd file that is being processed
+	{
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
+
+		dcdf.read((char*)HDR,sizeof(char)*4);
+		dcdf.read((char*)ICNTRL,sizeof(int)*20);
+
+		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));			//FORT CHECK NEEDS UNCOMMENT
+		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+	}
+	else
+	{
+		dcdf.read((char*)HDR,sizeof(char)*4);
+		dcdf.read((char*)ICNTRL,sizeof(int)*20);
+	}
+
 
 	HDR[4] = '\0';
 	NFILE = ICNTRL[0];
@@ -57,45 +68,84 @@ void DCD_R::read_header()
 	QCRYS = ICNTRL[10];
 	CHARMV = ICNTRL[19];
 
-	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
-	dcdf.read((char*)&NTITLE, sizeof(int));
-
-	if(NTITLE == 0)
+	if(check == 'C')
 	{
-		TITLE = new char[80+1];
-		TITLE[0] = '\0';
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
+		dcdf.read((char*)&NTITLE, sizeof(int));
+
+		if(NTITLE == 0)
+		{
+			TITLE = new char[80+1];
+			TITLE[0] = '\0';
+		}
+		else
+		{
+			TITLE = new char[NTITLE*80+1];
+			for(int i = 0; i < NTITLE; i++)
+			{
+				dcdf.read((char*)&TITLE[i*80], sizeof(char)*80);
+			}
+			TITLE[NTITLE*80] = '\0';
+		}
+		dcdf.read((char*)&fortcheck2, sizeof(unsigned int));            //FORT CHECK NEEDS UNCOMMENT
+		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 	}
 	else
 	{
-		TITLE = new char[NTITLE*80+1];
-		for(int i = 0; i < NTITLE; i++)
+		dcdf.read((char*)&NTITLE, sizeof(int));
+
+		if(NTITLE == 0)
 		{
-			dcdf.read((char*)&TITLE[i*80], sizeof(char)*80);
+			TITLE = new char[80+1];
+			TITLE[0] = '\0';
 		}
-		TITLE[NTITLE*80] = '\0';
+		else
+		{
+			TITLE = new char[NTITLE*80+1];
+			for(int i = 0; i < NTITLE; i++)
+			{
+				dcdf.read((char*)&TITLE[i*80], sizeof(char)*80);
+			}
+			TITLE[NTITLE*80] = '\0';
+		}
 	}
-	dcdf.read((char*)&fortcheck2, sizeof(unsigned int));            //FORT CHECK NEEDS UNCOMMENT
-	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+
 
 	//Reading number of atoms
-	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-	dcdf.read((char*)&NATOM,sizeof(int));
-	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORT CHECK UNCOMMENT
-
-	LNFREAT = NATOM - FROZAT;
-	if(LNFREAT != NATOM)
+	if(check == 'C')
 	{
-		FREEAT = new int[LNFREAT];
-		dcdf.read((char*)&fortcheck1, sizeof(unsigned int));
-		dcdf.read((char*)FREEAT, sizeof(int)*LNFREAT);
-		dcdf.read((char*)&fortcheck2, sizeof(unsigned int));
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
+		dcdf.read((char*)&NATOM,sizeof(int));
+		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORT CHECK UNCOMMENT
+
+		LNFREAT = NATOM - FROZAT;
+		if(LNFREAT != NATOM)
+		{
+			FREEAT = new int[LNFREAT];
+			dcdf.read((char*)&fortcheck1, sizeof(unsigned int));
+			dcdf.read((char*)FREEAT, sizeof(int)*LNFREAT);
+			dcdf.read((char*)&fortcheck2, sizeof(unsigned int));
+			checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORT CHECK UNCOMMENT
+		}
+		alloc();
 	}
-	alloc();
+	else
+	{
+		dcdf.read((char*)&NATOM,sizeof(int));
+
+		LNFREAT = NATOM - FROZAT;
+		if(LNFREAT != NATOM)
+		{
+			FREEAT = new int[LNFREAT];
+			dcdf.read((char*)FREEAT, sizeof(int)*LNFREAT);
+		}
+		alloc();
+	}
+
 }
 
-void DCD_R::read_oneFrame()
+void DCD_R::read_oneFrame(char check)
 {
 	//try
 	//{
@@ -106,76 +156,133 @@ void DCD_R::read_oneFrame()
 	float *tmpX = new float[siz];
 	float *tmpY = new float[siz];
 	float *tmpZ = new float[siz];
-
-	if(QCRYS)
+	if(check == 'C')
 	{
-		//cout<<"QCHRYS count was greater than 0" << endl;
-		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-		dcdf.read((char*)pbc,sizeof(double)* 6);
-		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORTCHECK UNCOMMENT
-	}
-		//X
-	//cout <<"Reading co-ordinates" << endl;
-	//cout <<"***fortcheck1***"<< endl;
-	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-	cout<< "fortcheck1: " << fortcheck1<<endl;
-	//cout << "*****reading x*****" <<endl;
-	dcdf.read((char*)tmpX,sizeof(float)*siz);	
-	//cout << "***fortcheck2***"<<endl;
-	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-	//cout<< "fortcheck2: " << fortcheck2 << endl;
-	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-	//cout<<"finished getting x co-ords"<<endl;
-	//Y
-	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-	dcdf.read((char*)tmpY,sizeof(float)*siz);	
-	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-
-	//Z
-	dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-	dcdf.read((char*)tmpZ,sizeof(float)*siz);	
-	dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-	checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-	//cout << "finished reading co-ordinates" <<endl;
-	
-
-
-	if(dcd_first_read)
-	{
-		//cout << "memcpy on first read" << endl;
-		memcpy(X, tmpX, NATOM*sizeof(float));
-		memcpy(Y, tmpY, NATOM*sizeof(float));
-		memcpy(Z, tmpZ ,NATOM*sizeof(float));
-	}
-	else
-	{
-		if(LNFREAT != NATOM)
+		if(QCRYS)
 		{
-			//cout << "before the for loop to reading xyz" <<endl;
-			for(int i =0; i < siz; i++)
-			{
-				X[FREEAT[i]-1] = tmpX[i];
-				Y[FREEAT[i]-1] = tmpY[i];
-				Z[FREEAT[i]-1] = tmpZ[i];
-			}
+			//cout<<"QCHRYS count was greater than 0" << endl;
+			dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
+			dcdf.read((char*)pbc,sizeof(double)* 6);
+			dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
+			checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORTCHECK UNCOMMENT
 		}
-		else
+			//X
+		//cout <<"Reading co-ordinates" << endl;
+		//cout <<"***fortcheck1***"<< endl;
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
+		cout<< "fortcheck1: " << fortcheck1<<endl;
+		//cout << "*****reading x*****" <<endl;
+		dcdf.read((char*)tmpX,sizeof(float)*siz);
+		//cout << "***fortcheck2***"<<endl;
+		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
+		//cout<< "fortcheck2: " << fortcheck2 << endl;
+		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+		//cout<<"finished getting x co-ords"<<endl;
+		//Y
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
+		dcdf.read((char*)tmpY,sizeof(float)*siz);
+		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
+		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+
+		//Z
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
+		dcdf.read((char*)tmpZ,sizeof(float)*siz);
+		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
+		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+		//cout << "finished reading co-ordinates" <<endl;
+
+
+
+		if(dcd_first_read)
 		{
-			//cout<<"memcpy else condition"<<endl;
+			//cout << "memcpy on first read" << endl;
 			memcpy(X, tmpX, NATOM*sizeof(float));
 			memcpy(Y, tmpY, NATOM*sizeof(float));
 			memcpy(Z, tmpZ ,NATOM*sizeof(float));
 		}
+		else
+		{
+			if(LNFREAT != NATOM)
+			{
+				//cout << "before the for loop to reading xyz" <<endl;
+				for(int i =0; i < siz; i++)
+				{
+					X[FREEAT[i]-1] = tmpX[i];
+					Y[FREEAT[i]-1] = tmpY[i];
+					Z[FREEAT[i]-1] = tmpZ[i];
+				}
+			}
+			else
+			{
+				//cout<<"memcpy else condition"<<endl;
+				memcpy(X, tmpX, NATOM*sizeof(float));
+				memcpy(Y, tmpY, NATOM*sizeof(float));
+				memcpy(Z, tmpZ ,NATOM*sizeof(float));
+			}
+		}
+
+		if(dcd_first_read)
+			dcd_first_read=false;
+		//cout << "delete temp arrays" <<endl;
+		delete[] tmpX;
+		delete[] tmpY;
+		delete[] tmpZ;
+	}
+	else
+	{
+		if(QCRYS)
+		{
+			//cout<<"QCHRYS count was greater than 0" << endl;
+			dcdf.read((char*)pbc,sizeof(double)* 6);
+		}
+			//X
+		//cout <<"Reading co-ordinates" << endl;
+		//cout << "*****reading x*****" <<endl;
+		dcdf.read((char*)tmpX,sizeof(float)*siz);
+
+		//Y
+		dcdf.read((char*)tmpY,sizeof(float)*siz);
+
+		//Z
+		dcdf.read((char*)tmpZ,sizeof(float)*siz);
+
+
+		if(dcd_first_read)
+		{
+			//cout << "memcpy on first read" << endl;
+			memcpy(X, tmpX, NATOM*sizeof(float));
+			memcpy(Y, tmpY, NATOM*sizeof(float));
+			memcpy(Z, tmpZ ,NATOM*sizeof(float));
+		}
+		else
+		{
+			if(LNFREAT != NATOM)
+			{
+				//cout << "before the for loop to reading xyz" <<endl;
+				for(int i =0; i < siz; i++)
+				{
+					X[FREEAT[i]-1] = tmpX[i];
+					Y[FREEAT[i]-1] = tmpY[i];
+					Z[FREEAT[i]-1] = tmpZ[i];
+				}
+			}
+			else
+			{
+				//cout<<"memcpy else condition"<<endl;
+				memcpy(X, tmpX, NATOM*sizeof(float));
+				memcpy(Y, tmpY, NATOM*sizeof(float));
+				memcpy(Z, tmpZ ,NATOM*sizeof(float));
+			}
+		}
+
+		if(dcd_first_read)
+			dcd_first_read=false;
+		//cout << "delete temp arrays" <<endl;
+		delete[] tmpX;
+		delete[] tmpY;
+		delete[] tmpZ;
 	}
 
-	if(dcd_first_read)
-		dcd_first_read=false;
-	//cout << "delete temp arrays" <<endl;
-	delete[] tmpX;
-	delete[] tmpY;
-	delete[] tmpZ;
 	}
 	//catch(const std ::exception& e)
 	//{

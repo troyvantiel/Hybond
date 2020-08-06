@@ -16,7 +16,9 @@ using namespace std;
 
 ofstream frameFile;
 ofstream Diffoutput;
-
+//int type2ix[56] = {0,1,0,0,2,0,0,1,1,0,3,0,0,2,2,0,1,1,0,1,0,0,0,0,0,1,1,1,1,2,2,2,3,3,4,0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,3,3,3,4,4,5};
+//int type2iy[56] = {0,0,1,0,0,2,0,1,0,1,0,3,0,1,0,2,2,0,1,1,0,1,2,3,4,0,1,2,3,0,1,2,0,1,0,0,1,2,3,4,5,0,1,2,3,4,0,1,2,3,0,1,2,0,1,0};
+//int type2iz[56] = {0,0,0,1,0,0,2,0,1,1,0,0,3,0,1,1,0,2,2,1,4,3,2,1,0,3,2,1,0,2,1,0,1,0,0,5,4,3,2,1,0,4,3,2,1,0,3,2,1,0,2,1,0,1,0,0};
 
 struct Coord
 {
@@ -180,10 +182,16 @@ int main(int argc, char* argv[])
     string file = " ";
 	int atom1 = 0;
 	int atom2 = 0;
+	char version;
+	char diff;
 
 	//Get the user input for the dcd file and the atoms that want exploring
 	cout << "Name of .dcd file you want to process: " <<endl;
 	cin >> file;
+	cout << "Software used to create file: ('N' for NAMD or 'C' for CHARMM)" << endl;
+	cin >> version;
+	cout << "Enable Difference Output: (Warning large file size) Y/n"<< endl;
+	cin >> diff;
 
 	const char * filename = file.c_str(); //convert the filename into a string
 	//filename = file;
@@ -192,7 +200,7 @@ int main(int argc, char* argv[])
 
 
     // read the header and print it
-    dcdf.read_header();
+    dcdf.read_header(version);
     dcdf.printHeader();
     int numFrames = dcdf.getNFILE(); //get the number of frames from the header to read in
     int nAtom = dcdf.getNATOM();
@@ -220,7 +228,7 @@ int main(int argc, char* argv[])
 
 
         //cout<< "Getting Frame: " << i << endl;
-        dcdf.read_oneFrame();
+        dcdf.read_oneFrame(version);
         //cout<< "Finished Getting Frame: " << i << endl;
         
         /* your code goes here */
@@ -269,8 +277,12 @@ int main(int argc, char* argv[])
         	}
         }
 
-        //Start moving from here and call the function from here
-        lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
+        if(diff == 'Y')
+        {
+            //Start moving from here and call the function from here
+            lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
+        }
+
 
 
         //outputting the frame to the file with the new atoms that have been filtered out by distance
