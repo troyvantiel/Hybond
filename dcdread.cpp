@@ -49,24 +49,37 @@ void DCD_R::read_header(char check)
 
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));			//FORT CHECK NEEDS UNCOMMENT
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+		HDR[4] = '\0';
+		NFILE = ICNTRL[0];
+		NPRIV = ICNTRL[1];
+		NSAVC = ICNTRL[2];
+		NSTEP = ICNTRL[3];
+		NDEGF = ICNTRL[7]; //Structure of the CHARMM header in the file
+		FROZAT = ICNTRL[8];
+		DELTA4 = ICNTRL[9];
+		QCRYS = ICNTRL[10];
+		CHARMV = ICNTRL[19];
 	}
 	else
 	{
 		dcdf.read((char*)HDR,sizeof(char)*4);
 		dcdf.read((char*)ICNTRL,sizeof(int)*20);
+
+		//Needs modifying for the NAMD structure of header
+		HDR[4] = '\0';
+		NFILE = ICNTRL[0];
+		NPRIV = ICNTRL[1];
+		NSAVC = ICNTRL[2];
+		NSTEP = ICNTRL[3];
+		NDEGF = ICNTRL[7];
+		FROZAT = ICNTRL[8];
+		DELTA4 = ICNTRL[9];
+		QCRYS = ICNTRL[10];
+		CHARMV = ICNTRL[19];
 	}
 
 
-	HDR[4] = '\0';
-	NFILE = ICNTRL[0];
-	NPRIV = ICNTRL[1];
-	NSAVC = ICNTRL[2];	
-	NSTEP = ICNTRL[3];
-	NDEGF = ICNTRL[7];
-	FROZAT = ICNTRL[8];
-	DELTA4 = ICNTRL[9];
-	QCRYS = ICNTRL[10];
-	CHARMV = ICNTRL[19];
+
 
 	if(check == 'C')
 	{

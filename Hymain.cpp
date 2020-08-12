@@ -202,7 +202,8 @@ int main(int argc, char* argv[])
     // read the header and print it
     dcdf.read_header(version);
     dcdf.printHeader();
-    int numFrames = dcdf.getNFILE(); //get the number of frames from the header to read in
+    int numFrames = dcdf.getNPRIV();
+    //int numFrames = dcdf.getNFILE(); //get the number of frames from the header to read in
     int nAtom = dcdf.getNATOM();
 
 	cout << "Number of atoms in the system: " << nAtom << endl;
