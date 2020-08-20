@@ -31,7 +31,10 @@ DCD_R::DCD_R(const char filename[])
 
 void DCD_R::alloc()
 {
+	cout << "in alloc before anything happens" << endl;
+	cout << "number stored in NATOM = " << NATOM << endl;
 	X = new float[NATOM];
+	cout << "after the first new float allocation" << endl;     //NOTE THESE 10000 NEED TO BE NATOM TO MAKE THE PROGRAM RUN COMPLETELY
 	Y = new float[NATOM];
 	Z = new float[NATOM];
 	pbc[0] = pbc[1] = pbc[2] = pbc[3] = pbc[4]= pbc[5] = 0.0;
@@ -39,7 +42,6 @@ void DCD_R::alloc()
 void DCD_R::read_header(char check)
 {
 	unsigned int fortcheck1, fortcheck2;
-
 	if(check == 'C') //check for which software package made the dcd file that is being processed
 	{
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
@@ -60,7 +62,7 @@ void DCD_R::read_header(char check)
 		QCRYS = ICNTRL[10];
 		CHARMV = ICNTRL[19];
 	}
-	else
+	else if(check == 'N')
 	{
 		dcdf.read((char*)HDR,sizeof(char)*4);
 		dcdf.read((char*)ICNTRL,sizeof(int)*20);
@@ -103,7 +105,7 @@ void DCD_R::read_header(char check)
 		dcdf.read((char*)&fortcheck2, sizeof(unsigned int));            //FORT CHECK NEEDS UNCOMMENT
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 	}
-	else
+	else if(check == 'N')
 	{
 		dcdf.read((char*)&NTITLE, sizeof(int));
 
@@ -121,6 +123,7 @@ void DCD_R::read_header(char check)
 			}
 			TITLE[NTITLE*80] = '\0';
 		}
+
 	}
 
 
@@ -143,7 +146,7 @@ void DCD_R::read_header(char check)
 		}
 		alloc();
 	}
-	else
+	else if(check == 'N')
 	{
 		dcdf.read((char*)&NATOM,sizeof(int));
 
@@ -154,6 +157,7 @@ void DCD_R::read_header(char check)
 			dcdf.read((char*)FREEAT, sizeof(int)*LNFREAT);
 		}
 		alloc();
+		cout << "Inside the read header method in dcdread.cpp and after the second fortcheck part and also in the NAMD else where we should be and before alloc call" << endl;
 	}
 
 }
@@ -166,6 +170,7 @@ void DCD_R::read_oneFrame(char check)
 
 	int siz = (dcd_first_read) ? NATOM : LNFREAT;
 	//int siz = LNFREAT;
+	cout << "SHOW ME THE SIZE BEING ALLOCATED TO TEMP ARRAYS" << siz << endl;
 	float *tmpX = new float[siz];
 	float *tmpY = new float[siz];
 	float *tmpZ = new float[siz];
@@ -177,47 +182,47 @@ void DCD_R::read_oneFrame(char check)
 			dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 			dcdf.read((char*)pbc,sizeof(double)* 6);
 			dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-			checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORTCHECK UNCOMMENT
+			//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORTCHECK UNCOMMENT
 		}
 			//X
 		//cout <<"Reading co-ordinates" << endl;
 		//cout <<"***fortcheck1***"<< endl;
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-		cout<< "fortcheck1: " << fortcheck1<<endl;
+		//cout<< "fortcheck1: " << fortcheck1<<endl;
 		//cout << "*****reading x*****" <<endl;
 		dcdf.read((char*)tmpX,sizeof(float)*siz);
 		//cout << "***fortcheck2***"<<endl;
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
 		//cout<< "fortcheck2: " << fortcheck2 << endl;
-		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+		//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 		//cout<<"finished getting x co-ords"<<endl;
 		//Y
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)tmpY,sizeof(float)*siz);
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+		//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 
 		//Z
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)tmpZ,sizeof(float)*siz);
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-		//cout << "finished reading co-ordinates" <<endl;
+		//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
+		cout << "finished reading co-ordinates" <<endl;
 
 
 
 		if(dcd_first_read)
 		{
-			//cout << "memcpy on first read" << endl;
-			memcpy(X, tmpX, NATOM*sizeof(float));
-			memcpy(Y, tmpY, NATOM*sizeof(float));
-			memcpy(Z, tmpZ ,NATOM*sizeof(float));
+			cout << "memcpy on first read" << endl;
+			memcpy(X, tmpX, siz*sizeof(float));
+			memcpy(Y, tmpY, siz*sizeof(float)); //TOO LARGE FOR APOA1 CAUSES SEGMENTATION FAULT
+			memcpy(Z, tmpZ ,siz*sizeof(float));
 		}
 		else
 		{
 			if(LNFREAT != NATOM)
 			{
-				//cout << "before the for loop to reading xyz" <<endl;
+				cout << "before the for loop to reading xyz" <<endl;
 				for(int i =0; i < siz; i++)
 				{
 					X[FREEAT[i]-1] = tmpX[i];
@@ -227,21 +232,21 @@ void DCD_R::read_oneFrame(char check)
 			}
 			else
 			{
-				//cout<<"memcpy else condition"<<endl;
-				memcpy(X, tmpX, NATOM*sizeof(float));
-				memcpy(Y, tmpY, NATOM*sizeof(float));
-				memcpy(Z, tmpZ ,NATOM*sizeof(float));
+				cout<<"memcpy else condition"<<endl;
+				memcpy(X, tmpX, siz*sizeof(float));
+				memcpy(Y, tmpY, siz*sizeof(float));
+				memcpy(Z, tmpZ, siz*sizeof(float));
 			}
 		}
 
 		if(dcd_first_read)
 			dcd_first_read=false;
-		//cout << "delete temp arrays" <<endl;
+		cout << "delete temp arrays" <<endl;
 		delete[] tmpX;
 		delete[] tmpY;
 		delete[] tmpZ;
 	}
-	else
+	else if(check == 'N')
 	{
 		if(QCRYS)
 		{
