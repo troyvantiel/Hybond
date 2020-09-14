@@ -18,8 +18,8 @@ public:
     DCD_R(const char filename[]); //constructor
     //DCD_R(string filename);
     
-    void read_header(char check);
-    void read_oneFrame(char check);
+    void read_header();
+    void read_oneFrame();
     void printHeader() const;
         
     ~DCD_R();

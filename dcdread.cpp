@@ -39,11 +39,9 @@ void DCD_R::alloc()
 	Z = new float[NATOM];
 	pbc[0] = pbc[1] = pbc[2] = pbc[3] = pbc[4]= pbc[5] = 0.0;
 }
-void DCD_R::read_header(char check)
+void DCD_R::read_header()
 {
 	unsigned int fortcheck1, fortcheck2;
-	if(check == 'C') //check for which software package made the dcd file that is being processed
-	{
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
 
 		dcdf.read((char*)HDR,sizeof(char)*4);
@@ -61,30 +59,12 @@ void DCD_R::read_header(char check)
 		DELTA4 = ICNTRL[9];
 		QCRYS = ICNTRL[10];
 		CHARMV = ICNTRL[19];
-	}
-	else if(check == 'N')
-	{
-		dcdf.read((char*)HDR,sizeof(char)*4);
-		dcdf.read((char*)ICNTRL,sizeof(int)*20);
-
-		//Needs modifying for the NAMD structure of header
-		HDR[4] = '\0';
-		NFILE = ICNTRL[0];
-		NPRIV = ICNTRL[1];
-		NSAVC = ICNTRL[2];
-		NSTEP = ICNTRL[3];
-		NDEGF = ICNTRL[7];
-		FROZAT = ICNTRL[8];
-		DELTA4 = ICNTRL[9];
-		QCRYS = ICNTRL[10];
-		CHARMV = ICNTRL[19];
-	}
 
 
 
 
-	if(check == 'C')
-	{
+
+
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
 		dcdf.read((char*)&NTITLE, sizeof(int));
 
@@ -104,32 +84,10 @@ void DCD_R::read_header(char check)
 		}
 		dcdf.read((char*)&fortcheck2, sizeof(unsigned int));            //FORT CHECK NEEDS UNCOMMENT
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-	}
-	else if(check == 'N')
-	{
-		dcdf.read((char*)&NTITLE, sizeof(int));
 
-		if(NTITLE == 0)
-		{
-			TITLE = new char[80+1];
-			TITLE[0] = '\0';
-		}
-		else
-		{
-			TITLE = new char[NTITLE*80+1];
-			for(int i = 0; i < NTITLE; i++)
-			{
-				dcdf.read((char*)&TITLE[i*80], sizeof(char)*80);
-			}
-			TITLE[NTITLE*80] = '\0';
-		}
-
-	}
 
 
 	//Reading number of atoms
-	if(check == 'C')
-	{
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)&NATOM,sizeof(int));
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
@@ -145,24 +103,10 @@ void DCD_R::read_header(char check)
 			checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORT CHECK UNCOMMENT
 		}
 		alloc();
-	}
-	else if(check == 'N')
-	{
-		dcdf.read((char*)&NATOM,sizeof(int));
-
-		LNFREAT = NATOM - FROZAT;
-		if(LNFREAT != NATOM)
-		{
-			FREEAT = new int[LNFREAT];
-			dcdf.read((char*)FREEAT, sizeof(int)*LNFREAT);
-		}
-		alloc();
-		cout << "Inside the read header method in dcdread.cpp and after the second fortcheck part and also in the NAMD else where we should be and before alloc call" << endl;
-	}
 
 }
 
-void DCD_R::read_oneFrame(char check)
+void DCD_R::read_oneFrame()
 {
 	//try
 	//{
@@ -174,8 +118,6 @@ void DCD_R::read_oneFrame(char check)
 	float *tmpX = new float[siz];
 	float *tmpY = new float[siz];
 	float *tmpZ = new float[siz];
-	if(check == 'C')
-	{
 		if(QCRYS)
 		{
 			//cout<<"QCHRYS count was greater than 0" << endl;
@@ -245,69 +187,8 @@ void DCD_R::read_oneFrame(char check)
 		delete[] tmpX;
 		delete[] tmpY;
 		delete[] tmpZ;
-	}
-	else if(check == 'N')
-	{
-		if(QCRYS)
-		{
-			//cout<<"QCHRYS count was greater than 0" << endl;
-			dcdf.read((char*)pbc,sizeof(double)* 6);
-		}
-			//X
-		//cout <<"Reading co-ordinates" << endl;
-		//cout << "*****reading x*****" <<endl;
-		dcdf.read((char*)tmpX,sizeof(float)*siz);
-
-		//Y
-		dcdf.read((char*)tmpY,sizeof(float)*siz);
-
-		//Z
-		dcdf.read((char*)tmpZ,sizeof(float)*siz);
-
-
-		if(dcd_first_read)
-		{
-			//cout << "memcpy on first read" << endl;
-			memcpy(X, tmpX, NATOM*sizeof(float));
-			memcpy(Y, tmpY, NATOM*sizeof(float));
-			memcpy(Z, tmpZ ,NATOM*sizeof(float));
-		}
-		else
-		{
-			if(LNFREAT != NATOM)
-			{
-				//cout << "before the for loop to reading xyz" <<endl;
-				for(int i =0; i < siz; i++)
-				{
-					X[FREEAT[i]-1] = tmpX[i];
-					Y[FREEAT[i]-1] = tmpY[i];
-					Z[FREEAT[i]-1] = tmpZ[i];
-				}
-			}
-			else
-			{
-				//cout<<"memcpy else condition"<<endl;
-				memcpy(X, tmpX, NATOM*sizeof(float));
-				memcpy(Y, tmpY, NATOM*sizeof(float));
-				memcpy(Z, tmpZ ,NATOM*sizeof(float));
-			}
-		}
-
-		if(dcd_first_read)
-			dcd_first_read=false;
-		//cout << "delete temp arrays" <<endl;
-		delete[] tmpX;
-		delete[] tmpY;
-		delete[] tmpZ;
-	}
-
-	}
-	//catch(const std ::exception& e)
-	//{
-	//	cout << e.what() <<endl;
-	//}
 	
-//}
+}
 void DCD_R::printHeader() const
 {
     int i;

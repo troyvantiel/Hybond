@@ -7,15 +7,21 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
-
+#include <sstream>
+#include <istream>
 #include "array_tools.hpp"
 #include "dcd_r.hpp"
 
+
+
+
 using namespace std;
 
-
+vector<string> atomtypes (0);
 ofstream frameFile;
 ofstream Diffoutput;
+
+
 //int type2ix[56] = {0,1,0,0,2,0,0,1,1,0,3,0,0,2,2,0,1,1,0,1,0,0,0,0,0,1,1,1,1,2,2,2,3,3,4,0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,3,3,3,4,4,5};
 //int type2iy[56] = {0,0,1,0,0,2,0,1,0,1,0,3,0,1,0,2,2,0,1,1,0,1,2,3,4,0,1,2,3,0,1,2,0,1,0,0,1,2,3,4,5,0,1,2,3,4,0,1,2,3,0,1,2,0,1,0};
 //int type2iz[56] = {0,0,0,1,0,0,2,0,1,1,0,0,3,0,1,1,0,2,2,1,4,3,2,1,0,3,2,1,0,2,1,0,1,0,0,5,4,3,2,1,0,4,3,2,1,0,3,2,1,0,2,1,0,1,0,0};
@@ -27,18 +33,90 @@ struct Coord
 	double z;
 };
 
-void OutputDifferencetoFile(double xdiff, double ydiff, double zdiff, int frameCount)
+void PasstoAtomData(vector<string> infovec)
 {
-	Diffoutput << "Difference in Frames:" << frameCount-1 << " and: " << frameCount << endl;
-	Diffoutput << xdiff << ydiff << zdiff << endl; //outputting the differences to a file
-
+	//cout << "Outputting the end of the vector" << endl;
+	//cout << "size of infovec" << infovec.size() << endl;
+	for(int i = 0; infovec.size(); i++)
+	{
+		if(infovec.back() == "Placeholder")
+		{
+			atomtypes.push_back("H");
+			//cout << "Pushed a Hydrogen atom to the types due to placeholder found" << endl;
+			break;
+		}
+		else
+		{
+			atomtypes.push_back(infovec.back());
+			//cout << "Pushed non placeholder to the back of the atom types" << endl;
+			break;
+		}
+	}
 }
 
+
+
+
+vector<string> readpdb()
+{
+	string filename;
+	vector<string> infovec (1);
+	cout << "Type the filename of pdb file" << endl;
+	cin >> filename;
+	fstream newfile;
+	newfile.open(filename, ios::in);
+	if(newfile.is_open())
+	{
+		string line;
+		while(getline(newfile, line))
+		{
+			int count =0;
+			//cout << line << "\n";
+			istringstream iss(line);
+			string s;
+			while(getline(iss,s,' '))
+			{
+				if(s.empty() == true)
+				{
+					s = "Placeholder";
+				}
+				cout << count << s << endl;
+				infovec.push_back(s);
+				count++;
+			}
+			PasstoAtomData(infovec);
+		}
+		newfile.close();
+	}
+	for(int i =0; i < 20; i++ ) //needs to use atomtypes.size()
+	{
+		cout << i << atomtypes.at(i) << endl;
+	}
+	return atomtypes;
+}
+
+void OutputDifferencetoFile(double xdiff, double ydiff, double zdiff, int frameCount)
+{
+	//outputting the differences to a file
+	Diffoutput << "Difference in Frames:" << frameCount-1 << " and: " << frameCount << endl;
+	Diffoutput << xdiff << ydiff << zdiff << endl;
+}
+void OutputRawFrametoFile(int currFrame, int numAtoms, vector<Coord> frames)
+{
+	ofstream rawfile;
+	string filename = "Frame:";
+	filename += std::to_string(currFrame);
+	filename += ".txt";
+	rawfile.open(filename);
+	for(int i = 0; i<=numAtoms; i++)
+	{
+		rawfile << i << " " << frames[i].x << " " << frames[i].y << " " << frames[i].z << endl;
+	}
+	rawfile.close();
+}
 void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 {
-
 	 //all writing needs to happen after the open and before the close.
-
 	frameFile << "Current Frame Printed: " << frameCount << endl;
 	for(int i = 0; i < numAtoms; i++)
 	{
@@ -48,18 +126,12 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 		}
 
 	}
-
-	//cout << "Frame outputted to file" << endl;
-	//frameFile.close();
 }
-
 vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom)
 {
-
 	double xdiff = 0;
 	double zdiff = 0;
 	double ydiff = 0;
-
 	if (currentFrame == 0)
 	{
 		//cout << "Current Frame is 0" << endl;
@@ -98,82 +170,7 @@ vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int curr
             //cout << " " << endl;
 		}
 	}
-
 	return atoms;
-
-	/*
-    vector<float> xvec (numFrames);
-    vector<float> zvec (numFrames);
-    vector<float> yvec (numFrames);		//set up vectors to store all the data points from the frames
-    vector<float> xvectemp (numFrames);
-    vector<float> zvectemp (numFrames);
-    vector<float> yvectemp (numFrames);
-
-    double xdiff = 0;
-    double zdiff = 0; //Set up the varibales to store the difference in the x,y,z coordinates
-    double ydiff = 0;
-
-    for(int u = 0; u < numFrames; u++)
-    	{
-	    	cout << "starting array copy of: " << x[u] << endl;
-	        xvec.at(u) = x[u];
-	        yvec.at(u) = y[u]; //array copying from const float* to vector<float> for ease of use
-	        zvec.at(u) = x[u];
-	        cout << "Data that was copied in: " << xvec.at(u) << endl;
-	    }
-	if(currentFrame == 0) //if the current frame is 0 no comparison can be made so alternate methods need to be taken
-		{
-			cout << "Current Frame is 0" << endl;
-	    	for (int k = 0; k < numFrames; k++) //looping through all the data
-	        	{
-	                cout << "x coordinates of atom: " << k << "  :  " << xvec[k] << endl;
-	            }
-	    }
-	else
-		{
-	    	for(int k = 0; k < numFrames; k++) //looping through the rest of the data
-	        	{
-	                //cout <<"Starting the difference calculation" << endl;
-	                cout << "x coordinates of atom:" << k << " :      " << xvec[k] << endl;
-	                cout << "X cocrdinates from last frame: " << xvectemp[k] << endl;
-	                cout << "Y cocrdinates from last frame: " << yvectemp[k] << endl; //displaying of information
-	                cout << "Z cocrdinates from last frame: " << zvectemp[k] << endl;
-
-
-	                xdiff = xvec[k] - xvectemp[k];
-	                zdiff = zvec[k] - zvectemp[k]; //calculation of the difference between the current frame and the last frame
-	                ydiff = yvec[k] - yvectemp[k];
-
-	                if(xdiff < 0)
-	                {
-	                	xdiff = xdiff * -1;//keep all differences positive values
-	                }
-	                if(zdiff < 0)
-	                {
-	                	zdiff = zdiff * -1;//keep all differences positive values
-	                }
-	                if(ydiff < 0)
-	                {
-	                	ydiff = ydiff * -1;//keep all differences positive values
-	                }
-
-
-	                cout << "Difference in X from last frame:    " << xdiff << endl;
-	                cout << "Difference in Y from last frame:    " << ydiff << endl; //display all the differences
-	                cout << "Difference in Z from last frame:    " << zdiff << endl;
-	                cout << " " << endl;
-	            }
-	    	}
-
-	        for(int b = 0; b < numFrames; b++)
-	        {
-	            cout << "starting temp array copy of: " << x[b] << endl;
-	            xvectemp.at(b) = xvec[b];
-	            zvectemp.at(b) = zvec[b]; //copy the current frame into the last frame arrays
-	            yvectemp.at(b) = yvec[b];
-	            cout << "Temp data that was copied in: " << xvectemp.at(b) << endl;
-	        }
-	        */
 }
 
 int main(int argc, char* argv[])
@@ -189,8 +186,8 @@ int main(int argc, char* argv[])
 		//Get the user input for the dcd file and the atoms that want exploring
 		cout << "Name of .dcd file you want to process: " <<endl;
 		cin >> file;
-		cout << "Software used to create file: ('N' for NAMD or 'C' for CHARMM)" << endl;
-		cin >> version;
+		//cout << "Software used to create file: ('N' for NAMD or 'C' for CHARMM)" << endl;
+		//cin >> version;
 		cout << "Enable Difference Output: (Warning large file size) Y/n"<< endl;
 		cin >> diff;
 
@@ -201,7 +198,7 @@ int main(int argc, char* argv[])
 		DCD_R dcdf(filename); //read the dcd file with the filename that was given
 
 		// read the header and print it
-		dcdf.read_header(version);
+		dcdf.read_header();
 		cout << "ERROR AFTER THE DCDF FILE READ HEADER" << endl;
 		dcdf.printHeader();
 		//int numFrames = dcdf.getNPRIV();
@@ -219,10 +216,12 @@ int main(int argc, char* argv[])
 
 		const float *x,*y,*z; //make the const float varibles to store the coordinates.
 		Coord atom;
-		vector<Coord> atomsvec (92224);
-		vector<Coord> lastvec (92224); //make the vectors to store all the information
-		vector<Coord> refinedVec (92224);
+		vector<Coord> atomsvec (nAtom);
+		vector<Coord> lastvec (nAtom); //make the vectors to store all the information
+		vector<Coord> refinedVec (nAtom);
+		vector<string> pdbVec (nAtom);
 
+		pdbVec = readpdb();
 		frameFile.open ("Frames.txt"); // open file to be used by the frame output
 		Diffoutput.open("DiffOut.txt");
 		// in this loop the coordinates are read frame by frame
@@ -232,7 +231,7 @@ int main(int argc, char* argv[])
 
 
 			cout<< "Getting Frame: " << i << endl;
-			dcdf.read_oneFrame(version);
+			dcdf.read_oneFrame();
 			cout<< "Finished Getting Frame: " << i << endl;
 
 			/* your code goes here */
@@ -247,7 +246,7 @@ int main(int argc, char* argv[])
 			//change the x,y,z coordinates into an atom struct that holds all that data
 			cout << "for loop will run this many times:" << nAtom << endl;
 			cout << "length of each of the arrays holding the coords" << endl;
-			for(int k = 0; k < 92224; k++)
+			for(int k = 0; k < nAtom; k++)
 			{
 				atom.x = x[k];
 				atom.y = y[k];
@@ -260,10 +259,12 @@ int main(int argc, char* argv[])
 			Coord firstAtom = atomsvec.at(atom1);
 			Coord secondAtom = atomsvec.at(atom2);
 			int dataAdd = 2;
-			for(int l = 0; l < 92224; l++)
+			for(int l = 0; l < nAtom; l++)
 			{
-				Coord tempAtom = atomsvec.at(l);
+				//start writing method for the code in the loop
+				// variables that can be passed to the method: Each Atom , first Atom , second Atom , vector to add to , vector of atoms, dataAdd variable , loopcount
 
+				Coord tempAtom = atomsvec.at(l);
 				double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x);
 				double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y); //finding the squared difference of each x y z for both the selected atoms
 				double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z);
@@ -293,7 +294,8 @@ int main(int argc, char* argv[])
 
 			cout << "if seen the error lies within the outputing frame to file function" << endl;
 			//outputting the frame to the file with the new atoms that have been filtered out by distance
-			OutputFrametoFile(refinedVec, i, 92224);
+			OutputRawFrametoFile(i, nAtom, atomsvec);
+			OutputFrametoFile(refinedVec, i, nAtom);
 
 
 

@@ -4,11 +4,11 @@
 #include <math.h>
 
 #define PI 3.14159265
-#define abso(x) ((x > 0)? x: -x)
+#define abso(x) ((x > 0)? x: -x)			//defining the variables needed for the calculations
 #define A(x,y) (elecHess[y * 3 + x - 4])
 
-const double rhoCutoff = 0.1;
-const int ArCutOff = 18;
+const double rhoCutoff = 0.1; //rho cut off variable
+const int ArCutOff = 18; //argon cut off as the approximation only goes this far
 
 
 using namespace std;

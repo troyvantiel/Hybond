@@ -1,4 +1,4 @@
-#include "pdbReader.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -11,27 +11,29 @@ vector<string> atomtypes (0);
 
 void PasstoAtomData(vector<string> infovec)
 {
-	cout << "Outputting the end of the vector" << endl;
-	cout << "size of infovec" << infovec.size() << endl;
-	/*for(int i  =0; infovec.size(); i++)
+	//cout << "Outputting the end of the vector" << endl;
+	//cout << "size of infovec" << infovec.size() << endl;
+	for(int i = 0; infovec.size(); i++)
 	{
 		if(infovec.back() == "Placeholder")
 		{
-			infovec.push_back("H");
-			cout << "Pushed a Hydrogen atom to the types due to placeholder found" << endl;
+			atomtypes.push_back("H");
+			//cout << "Pushed a Hydrogen atom to the types due to placeholder found" << endl;
+			break;
 		}
 		else
 		{
 			atomtypes.push_back(infovec.back());
-			cout << "Pushed non placeholder to the back of the atom types" << endl;
+			//cout << "Pushed non placeholder to the back of the atom types" << endl;
+			break;
 		}
-	}*/
+	}
 }
 
 
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	string filename;
 	vector<string> infovec (1);
@@ -45,27 +47,48 @@ int main()
 		while(getline(newfile, line))
 		{
 			int count =0;
+			int notemptycount =0;
+			int whilecounter = 0;
 			//cout << line << "\n";
 			istringstream iss(line);
+			//cout << line << endl;
 			string s;
 			while(getline(iss,s,' '))
 			{
-				if(s.empty() == true)
+				//cout << "**WC: " << whilecounter << "**";
+				if(whilecounter == 0)
 				{
-					s = "Placeholder";
+					if(s != "ATOM")
+					{
+						break;
+					}
+				}
+				whilecounter++;
+				count++;
+				if(!s.empty())
+				{
+					notemptycount++;
+					//cout << "**NEC:" << notemptycount << "**";
+					if(notemptycount == 3)
+					{
+						cout << "Atom Types: " << s.front() << endl;
+
+					}
 				}
 				//cout << count << s << endl;
-				infovec.push_back(s);
-				count++;
+				//cout << "Data at each split:" << s << endl;
+				//cout << "Data at position 3 in the file" << s[2] << endl;
 			}
 			PasstoAtomData(infovec);
 		}
 		newfile.close();
 	}
-	for(int i =0; i < infovec.size(); i++ )
+	for(int i =0; i < 20; i++ ) //needs to use atomtypes.size()
 	{
-
+		cout << i << atomtypes.at(i) << endl;
 	}
+	return 0;
 }
+
 
 
