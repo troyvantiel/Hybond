@@ -8,6 +8,9 @@
 
 using namespace std;
 vector<string> atomtypes (0);
+//Note: This approach doesnt give enough information for determining
+//Note:	the following atoms: He,Ne,Na,Be,Si,Cl
+vector<string> elementcheck{"H","C","O","N","F","B","P","S","NA","MG","AL","SI","CL","LI","BE","NE","AR","HE"};
 
 void PasstoAtomData(vector<string> infovec)
 {
@@ -71,7 +74,29 @@ int main(int argc, char* argv[])
 					//cout << "**NEC:" << notemptycount << "**";
 					if(notemptycount == 3)
 					{
-						cout << "Atom Types: " << s.front() << endl;
+
+						string atomtype = "";
+						atomtype = s[0];
+						//if() //needs to check if there is a second character otherwise it will add something the program doesnt recognise
+						//{
+							//atomtype += s[1];
+						//}
+
+						cout << "S at position 1 contains: " << s[1];
+						for(int atchk = 0; atchk <= 18; atchk++)
+						{
+							if(atomtype == elementcheck[atchk])
+							{
+								cout << "found atom in list: " << elementcheck[atchk];
+								atomtypes.push_back(atomtype);
+								break;
+							}
+							if(atchk == 18)
+							{
+								cout << "ran atchk 18 times ";
+							}
+						}
+
 
 					}
 				}
@@ -79,13 +104,13 @@ int main(int argc, char* argv[])
 				//cout << "Data at each split:" << s << endl;
 				//cout << "Data at position 3 in the file" << s[2] << endl;
 			}
-			PasstoAtomData(infovec);
+			//PasstoAtomData(infovec);
 		}
 		newfile.close();
 	}
-	for(int i =0; i < 20; i++ ) //needs to use atomtypes.size()
+	for(string atom : atomtypes)
 	{
-		cout << i << atomtypes.at(i) << endl;
+		cout << atom << endl;
 	}
 	return 0;
 }
