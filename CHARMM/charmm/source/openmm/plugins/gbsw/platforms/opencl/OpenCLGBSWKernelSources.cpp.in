@@ -1,9 +1,0 @@
-/* -------------------------------------------------------------------------- *
- *                                 OpenMMGBSW                                 *
- * -------------------------------------------------------------------------- */
-
-#include "OpenCLGBSWKernelSources.h"
-
-using namespace OpenMMGBSW;
-using namespace std;
-

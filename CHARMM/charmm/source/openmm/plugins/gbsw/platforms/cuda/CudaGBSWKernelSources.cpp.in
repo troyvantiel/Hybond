@@ -1,8 +1,0 @@
-/* -------------------------------------------------------------------------- *
- *                                 OpenMMGBSW                                 *
- * -------------------------------------------------------------------------- */
-
-#include "CudaGBSWKernelSources.h"
-
-using namespace OpenMMGBSW;
-using namespace std;

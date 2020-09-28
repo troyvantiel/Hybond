@@ -1,6 +1,0 @@
-#! /bin/csh
-
-foreach i ($argv)
-   mv $i $i.orig
-   awk -f ~/bin/fiximpnon.awk $i.orig > $i
-end

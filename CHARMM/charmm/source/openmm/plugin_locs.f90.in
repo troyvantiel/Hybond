@@ -1,3 +1,0 @@
-character(len=*), parameter :: &
-  OPENMM_PLUGIN_DIR = "${OPENMM_PLUGIN_DIR}", &
-  CHARMM_PLUGIN_DIR = "${CHARMM_PLUGIN_DIR}"
