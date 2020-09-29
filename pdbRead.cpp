@@ -12,107 +12,45 @@ vector<string> atomtypes (0);
 //Note:	the following atoms: He,Ne,Na,Be,Si,Cl
 vector<string> elementcheck{"H","C","O","N","F","B","P","S","NA","MG","AL","SI","CL","LI","BE","NE","AR","HE"};
 
-void PasstoAtomData(vector<string> infovec)
-{
-	//cout << "Outputting the end of the vector" << endl;
-	//cout << "size of infovec" << infovec.size() << endl;
-	for(int i = 0; infovec.size(); i++)
-	{
-		if(infovec.back() == "Placeholder")
-		{
-			atomtypes.push_back("H");
-			//cout << "Pushed a Hydrogen atom to the types due to placeholder found" << endl;
-			break;
-		}
-		else
-		{
-			atomtypes.push_back(infovec.back());
-			//cout << "Pushed non placeholder to the back of the atom types" << endl;
-			break;
-		}
-	}
-}
-
-
-
-
 int main(int argc, char* argv[])
 {
 	string filename;
-	vector<string> infovec (1);
-	cout << "Type the filename of pdb file" << endl;
-	cin >> filename;
-	fstream newfile;
-	newfile.open(filename, ios::in);
-	if(newfile.is_open())
-	{
-		string line;
-		while(getline(newfile, line))
+		vector<string> infovec (1);
+		cout << "Type the filename of pdb file" << endl;
+		cin >> filename;
+		fstream newfile;
+		newfile.open(filename, ios::in);
+		if(newfile.is_open())
 		{
-			int count =0;
-			int notemptycount =0;
-			int whilecounter = 0;
-			//cout << line << "\n";
-			istringstream iss(line);
-			//cout << line << endl;
-			string s;
-			while(getline(iss,s,' '))
+			string line;
+			while(getline(newfile, line))
 			{
-				//cout << "**WC: " << whilecounter << "**";
-				if(whilecounter == 0)
+				int count =0;
+				//cout << line << "\n";
+				istringstream iss(line);
+				string s;
+				while(getline(iss,s,' '))
 				{
-					if(s != "ATOM")
+					while(count == 0)
 					{
-						break;
-					}
-				}
-				whilecounter++;
-				count++;
-				if(!s.empty())
-				{
-					notemptycount++;
-					//cout << "**NEC:" << notemptycount << "**";
-					if(notemptycount == 3)
-					{
-
-						string atomtype = "";
-						atomtype = s[0];
-						//if() //needs to check if there is a second character otherwise it will add something the program doesnt recognise
-						//{
-							//atomtype += s[1];
-						//}
-
-						cout << "S at position 1 contains: " << s[1];
-						for(int atchk = 0; atchk <= 18; atchk++)
+						if(s.length() > 1)
 						{
-							if(atomtype == elementcheck[atchk])
-							{
-								cout << "found atom in list: " << elementcheck[atchk];
-								atomtypes.push_back(atomtype);
-								break;
-							}
-							if(atchk == 18)
-							{
-								cout << "ran atchk 18 times ";
-							}
+							break;
 						}
-
-
+						cout << count << s << endl;
+						atomtypes.push_back(s);
+						count++;
 					}
 				}
-				//cout << count << s << endl;
-				//cout << "Data at each split:" << s << endl;
-				//cout << "Data at position 3 in the file" << s[2] << endl;
+
 			}
-			//PasstoAtomData(infovec);
+			newfile.close();
 		}
-		newfile.close();
-	}
-	for(string atom : atomtypes)
-	{
-		cout << atom << endl;
-	}
-	return 0;
+		for(int i =0; i < atomtypes.size(); i++ ) //needs to use atomtypes.size()
+		{
+			cout << "Vector *atomtypes* at position: " << i << " -- "<< atomtypes.at(i) << endl;
+		}
+		return 0;
 }
 
 
