@@ -93,7 +93,7 @@ void OutputRawFrametoFile(int currFrame, int numAtoms, vector<Coord> frames)
 	{
 		//string temptype ="";
 		//temptype = frames[i].type;
-		rawfile << frames[i].type << "" <<frames[i].atnum << " " << frames[i].x << " " << frames[i].y << " " << frames[i].z << endl;
+		rawfile << frames[i].type << " " << frames[i].x << " " << frames[i].y << " " << frames[i].z << endl;
 	}
 	rawfile.close();
 }

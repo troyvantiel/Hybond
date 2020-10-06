@@ -28,7 +28,7 @@ void setup()
 {
 	czeta1 = new double[ArCutOff];
 	czeta2 = new double[AtCutOff];
-	czeta3 = new double[ArCutOff];
+	czeta3 = new double[ArCutOff];  //creates the arrays with the argon cutoff size
 	czzeta1 = new double[ArCutOff];
 	czzeta2 = new double[ArCutOff];
 	czzeta3 = new double[ArCutOff];
@@ -37,12 +37,12 @@ void setup()
 void getHesRho()
 {
 	rho =0;
-	dxrho = 0;
+	dxrho = 0; //set up variables with a rho and a rho for x,y and z
 	dyrho = 0;
 	dzrho = 0;
 	for(int i = 0; i<9; i++)
 	{
-		elecHess[i] = 0;
+		elecHess[i] = 0; //fill up the elecHess array with 0's
 
 	}
 	for(int i =0; i <centers; i++)
