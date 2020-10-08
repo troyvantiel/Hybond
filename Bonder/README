@@ -1,0 +1,55 @@
+﻿This calculates regions of non covalent interaction using promolecular estimations of electron densities
+
+Making bonder
+Step one: install boost 
+sudo apt-get install libboost-all-dev
+If you do not have administrative access, install boost locally and edit the makefile 
+Step two: run make
+step 3 copy the bond excutable to where you want to install it
+
+Usage
+bond h will give the various modes the program has
+calling bond with just a letter will tell you the proper arguments for that mode of operation
+bonder is more useful with bonder tools, these tools will automatically run bonder with specific arguments the correspond to common usages
+
+options 
+common inputs
+inputFile: the wfn/wfx file read into bonder
+res: the resolution of search algorithm and the integrator (normal value is 0.02)
+cutoff: the RDG value which is used to distinguish between inside a NCI and outside (normal value is 0.3 or 0.5)
+outputfile: this is the prefix used for all output files, each detected interaction will produce three to five files depending on the complexity of the interactions
+
+
+
+bond p inputFile x y z res cutoff outputFile
+this looks at a point, defined by (x y z), in the wfn file, detects if it is inside an interaction and if it is bonder searches out from that point and catalogs the interaction
+
+bonder l inputfile atom1 atom2 res cutoff outputfile
+This option draws a line between atom1 and atom2 from there if it detects an interaction it will catalog that interaction
+
+bonder t inputfile atom1 atom2 atom3 res cutoff outputfile
+This option draws a line between the center of  atom1 and atom2 to atom3 from there if it detects an interaction it will catalog that interaction
+
+bonder q inputfile atom1 atom2 atom3 atom4 res cutoff outputfile
+This option draws a line between the center of  atom1 and atom2 to the center of atom3 and atom4 from there if it detects an interaction it will catalog that interaction
+
+bonder g inputFile minx miny minz maxx maxy maxz res outputFile
+Defines a cube, bonder then analyses the interactions inside that cube
+
+bonder a inputFile res cutoff outputFile
+This option finds all interactions and catalogs all of them
+Warning: due to multithreading this option is non-deterministic, due to grids being offset, running this program multiple times can lead to differences, a smaller res value will reduce these differences
+All values produced are equally valid 
+
+output data
+
+bonder will output 3 to 5 files
+the first two are .cuberdg and .cuberhosign these are both Gaussian cube files, the first indacates where the interactions are, while the second indicates what type of interactions are at which location
+
+These cubefiles can be opened by any program that can veiw gausian cubes. bondertools has a genvmd script that packages everything up into a nice vmd script. 
+
+There willbe 1 or 3 .csv files per interaction, p.csv, m.csv and t.csv, these show the vaules of some indacatiors that we have found strongly correlate to hydrogen bond strength.
+p.csv is positive interactions (which tend to be repulsive), m.csv is negative interactions (which tend to be positive) and t.csv is the sum of the two if there are both positive and negative components to the interaction
+
+
+

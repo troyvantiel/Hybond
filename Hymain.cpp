@@ -297,9 +297,9 @@ int main(int argc, char* argv[])
 			OutputRawFrametoFile(i, nAtom, atomsvec);
 			OutputFrametoFile(refinedVec, i, nAtom);
 
-
-
-
+			//timing start
+			//Bonder();
+			//timing end;
 
 
 
