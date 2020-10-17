@@ -322,6 +322,13 @@ int main(int argc, char* argv[])
 				frameFile.close(); // close the frame output file to stop any bugs
 				Diffoutput.close();
 		}
+		for(int i = 0; i < 250; i++)
+		{
+			std::string newfile = "Frames/Frame:";
+			newfile += std::to_string(i);
+			newfile += ".txt";
+			bond(argc, argv, newfile, i);
+		}
 	}
 	catch(std::bad_alloc& ba)
 	{
