@@ -176,9 +176,10 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 		int k = reps / 2 + flips * i / 2;
 		flips *= -1;
 		double mesured = (*batch).RDG(lowX + k*dx, lowY + k*dy, lowZ + k*dz);
+		//std::cout << "Just before the cutoff check" << mesured << std::endl;
 		if (mesured <= cutoff)
 		{
-
+			//std::cout << "just before the analize call and after the cutoff check" << std::endl;
 			analysis analize = analysis();
 			analize.setUpAnalysisBatch(lowX + k*dx, lowY + k*dy, lowZ + k*dz, res,batch);
 
