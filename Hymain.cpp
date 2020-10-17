@@ -11,6 +11,7 @@
 #include <istream>
 #include "array_tools.hpp"
 #include "dcd_r.hpp"
+#include "Compat.hpp"
 
 
 
@@ -88,7 +89,7 @@ void OutputRawFrametoFile(int currFrame, int numAtoms, vector<Coord> frames)
 	filename += std::to_string(currFrame);
 	filename += ".txt";
 	rawfile.open(filename);
-	rawfile << numAtoms << endl;
+	rawfile << numAtoms-1 << endl;
 	for(int i = 0; i<numAtoms; i++)
 	{
 		//string temptype ="";
@@ -166,155 +167,161 @@ int main(int argc, char* argv[])
 		int atom2 = 0;
 		char version;
 		char diff;
+		char skip;
+		cout << "Do you want to skip processing a .dcd and .pdb file?  (Y/n)" << endl;
+		cin >> skip;
 
-		//Get the user input for the dcd file and the atoms that want exploring
-		cout << "Name of .dcd file you want to process: " <<endl;
-		cin >> file;
-		//cout << "Software used to create file: ('N' for NAMD or 'C' for CHARMM)" << endl;
-		//cin >> version;
-		cout << "Enable Difference Output: (Warning large file size) Y/n"<< endl;
-		cin >> diff;
-
-		//convert the filename into a string and read dcd file from that name
-		const char * filename = file.c_str();
-		DCD_R dcdf(filename);
-
-		// read the header and print it
-		dcdf.read_header();
-		dcdf.printHeader();
-
-		//int numFrames = dcdf.getNPRIV();
-
-		//get the number of frames from the header to read in
-		int numFrames = dcdf.getNFILE();
-		int nAtom = dcdf.getNATOM();
-
-
-		cout << "Number of atoms in the system: " << nAtom << endl;
-		cout <<"Number of first atom for analysis:" << endl;
-		cin >> atom1;												//select the atoms to be looked at in the analysis
-		cout << "Number of second atom for analysis:" << endl;
-		cin >> atom2;
-
-		//prints the variables that were chosen by the user
-		cout << "Variables are as follows: " << file << " ### " << atom1 << " ### " << atom2 << " ### " << endl;
-
-		 //make the const float varibles to store the coordinates.
-		const float *x,*y,*z;
-		Coord atom;
-
-		//make the vectors to store all the information
-		vector<Coord> atomsvec (nAtom);
-		vector<Coord> lastvec (nAtom);
-		vector<Coord> refinedVec (nAtom);
-		vector<string> pdbVec (nAtom);
-
-		//Calls the pead pdb file method to get the atom tpyes for analysis
-		pdbVec = readpdb();
-
-		//Open files to be used by the frame and difference output
-		frameFile.open ("Frames.txt");
-		Diffoutput.open("DiffOut.txt");
-		// in this loop the coordinates are read frame by frame
-		for(int i=0; i < numFrames; i++)
+		if(skip != 'Y')
 		{
+				//Get the user input for the dcd file and the atoms that want exploring
+				cout << "Name of .dcd file you want to process: " <<endl;
+				cin >> file;
+				//cout << "Software used to create file: ('N' for NAMD or 'C' for CHARMM)" << endl;
+				//cin >> version;
+				cout << "Enable Difference Output: (Warning large file size) Y/n"<< endl;
+				cin >> diff;
 
-			//Reads frame one by one and processes it
-			//cout<< "Getting Frame: " << i << endl;
-			dcdf.read_oneFrame();
-			//cout<< "Finished Getting Frame: " << i << endl;
+				//convert the filename into a string and read dcd file from that name
+				const char * filename = file.c_str();
+				DCD_R dcdf(filename);
 
-			//Your Code Goes Here
+				// read the header and print it
+				dcdf.read_header();
+				dcdf.printHeader();
 
+				//int numFrames = dcdf.getNPRIV();
 
-			//Getting x,y and z Co-ordinates and storing them in an array
-			//cout << "Getting the x y and z coords" << endl;
-			x = dcdf.getX();
-			y = dcdf.getY();
-			z = dcdf.getZ();
-			//cout << "Finished getting the x y z coords for the frame" << endl;
-			//cout << "for loop will run this many times:" << nAtom << endl;
-			//cout << "length of each of the arrays holding the coords" << endl;
-
-			//change the x,y,z coordinates into an atom struct that holds all the data
-			for(int k = 0; k < nAtom; k++)
-			{
-				atom.type = pdbVec[k];
-				atom.atnum = k;
-				atom.x = x[k];
-				atom.y = y[k];
-				atom.z = z[k];
-				//adds atom to the vector
-				atomsvec.at(k) = atom;
-			}
+				//get the number of frames from the header to read in
+				int numFrames = dcdf.getNFILE();
+				int nAtom = dcdf.getNATOM();
 
 
+				cout << "Number of atoms in the system: " << nAtom << endl;
+				cout <<"Number of first atom for analysis:" << endl;
+				cin >> atom1;												//select the atoms to be looked at in the analysis
+				cout << "Number of second atom for analysis:" << endl;
+				cin >> atom2;
 
-			//calculate the distance between the selected atoms and the atoms in the molecule using Euclidean Distance
+				//prints the variables that were chosen by the user
+				cout << "Variables are as follows: " << file << " ### " << atom1 << " ### " << atom2 << " ### " << endl;
 
-			//set up coordinate variable for each atom
-			Coord firstAtom = atomsvec.at(atom1);
-			Coord secondAtom = atomsvec.at(atom2);
-			//offset for adding to the file
-			int dataAdd = 2;
+				 //make the const float varibles to store the coordinates.
+				const float *x,*y,*z;
+				Coord atom;
 
+				//make the vectors to store all the information
+				vector<Coord> atomsvec (nAtom);
+				vector<Coord> lastvec (nAtom);
+				vector<Coord> refinedVec (nAtom);
+				vector<string> pdbVec (nAtom);
 
-			for(int l = 0; l < nAtom; l++)
-			{
-				//start writing method for the code in the loop
-				// variables that can be passed to the method: Each Atom , first Atom , second Atom , vector to add to , vector of atoms, dataAdd variable , loopcount
+				//Calls the pead pdb file method to get the atom tpyes for analysis
+				pdbVec = readpdb();
 
-				Coord tempAtom = atomsvec.at(l);
-				double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x);
-				double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y); //finding the squared difference of each x y z for both the selected atoms
-				double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z);
-
-				double ssqx = (secondAtom.x - tempAtom.x) * (secondAtom.x - tempAtom.x);
-				double ssqy = (secondAtom.y - tempAtom.y) * (secondAtom.y - tempAtom.y);
-				double ssqz = (secondAtom.z - tempAtom.z) * (secondAtom.z - tempAtom.z);
-
-				double firstDist = sqrt((fsqx) + (fsqy) + (fsqz)); //calculating the distance the atom is from the selected ones
-				double secondDist = sqrt((ssqx) +(ssqy) + (ssqz));
-
-				if(firstDist <= 5 || secondDist <= 5) //filtering out all the needed atoms
+				//Open files to be used by the frame and difference output
+				frameFile.open ("Frames.txt");
+				Diffoutput.open("DiffOut.txt");
+				// in this loop the coordinates are read frame by frame
+				for(int i=0; i < numFrames; i++)
 				{
-					refinedVec.at(0) = atomsvec.at(atom1); //adding the original picked atoms before the rest of the considered atoms
-					refinedVec.at(1) = atomsvec.at(atom2);
-					refinedVec.at(dataAdd) = atomsvec.at(l); //adding the new atom that is also to be considered in the future calculations
-					dataAdd ++;
+
+					//Reads frame one by one and processes it
+					//cout<< "Getting Frame: " << i << endl;
+					dcdf.read_oneFrame();
+					//cout<< "Finished Getting Frame: " << i << endl;
+
+					//Your Code Goes Here
+
+
+					//Getting x,y and z Co-ordinates and storing them in an array
+					//cout << "Getting the x y and z coords" << endl;
+					x = dcdf.getX();
+					y = dcdf.getY();
+					z = dcdf.getZ();
+					//cout << "Finished getting the x y z coords for the frame" << endl;
+					//cout << "for loop will run this many times:" << nAtom << endl;
+					//cout << "length of each of the arrays holding the coords" << endl;
+
+					//change the x,y,z coordinates into an atom struct that holds all the data
+					for(int k = 0; k < nAtom; k++)
+					{
+						atom.type = pdbVec[k];
+						atom.atnum = k;
+						atom.x = x[k];
+						atom.y = y[k];
+						atom.z = z[k];
+						//adds atom to the vector
+						atomsvec.at(k) = atom;
+					}
+
+
+
+					//calculate the distance between the selected atoms and the atoms in the molecule using Euclidean Distance
+
+					//set up coordinate variable for each atom
+					Coord firstAtom = atomsvec.at(atom1);
+					Coord secondAtom = atomsvec.at(atom2);
+					//offset for adding to the file
+					int dataAdd = 2;
+
+
+					for(int l = 0; l < nAtom; l++)
+					{
+						//start writing method for the code in the loop
+						// variables that can be passed to the method: Each Atom , first Atom , second Atom , vector to add to , vector of atoms, dataAdd variable , loopcount
+
+						Coord tempAtom = atomsvec.at(l);
+						double fsqx = (firstAtom.x - tempAtom.x) * (firstAtom.x - tempAtom.x);
+						double fsqy = (firstAtom.y - tempAtom.y) * (firstAtom.y - tempAtom.y); //finding the squared difference of each x y z for both the selected atoms
+						double fsqz = (firstAtom.z - tempAtom.z) * (firstAtom.z - tempAtom.z);
+
+						double ssqx = (secondAtom.x - tempAtom.x) * (secondAtom.x - tempAtom.x);
+						double ssqy = (secondAtom.y - tempAtom.y) * (secondAtom.y - tempAtom.y);
+						double ssqz = (secondAtom.z - tempAtom.z) * (secondAtom.z - tempAtom.z);
+
+						double firstDist = sqrt((fsqx) + (fsqy) + (fsqz)); //calculating the distance the atom is from the selected ones
+						double secondDist = sqrt((ssqx) +(ssqy) + (ssqz));
+
+						if(firstDist <= 5 || secondDist <= 5) //filtering out all the needed atoms
+						{
+							refinedVec.at(0) = atomsvec.at(atom1); //adding the original picked atoms before the rest of the considered atoms
+							refinedVec.at(1) = atomsvec.at(atom2);
+							refinedVec.at(dataAdd) = atomsvec.at(l); //adding the new atom that is also to be considered in the future calculations
+							dataAdd ++;
+						}
+					}
+					//cout << "after the euclidean distance calculation" << endl;
+					if(diff == 'Y')
+					{
+						//Start moving from here and call the function from here
+						lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
+					}
+
+
+					//cout << "if seen the error lies within the outputing frame to file function" << endl;
+					//outputting the frame to the file with the new atoms that have been filtered out by distance
+					OutputRawFrametoFile(i, nAtom, atomsvec);
+					OutputFrametoFile(refinedVec, i, nAtom);
+
+					//timing start
+					//Bonder();
+					//timing end;
+
+
+
+					//frame counter
+					cout << "Finished frame: " << i << endl;
+
+					//final print of header for additional information
+					//dcdf.printHeader();
+					//cout << "After the print header at the end" << endl;
+
+					/* ... */
+
 				}
-			}
-			//cout << "after the euclidean distance calculation" << endl;
-			if(diff == 'Y')
-			{
-				//Start moving from here and call the function from here
-				lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
-			}
-
-
-			//cout << "if seen the error lies within the outputing frame to file function" << endl;
-			//outputting the frame to the file with the new atoms that have been filtered out by distance
-			OutputRawFrametoFile(i, nAtom, atomsvec);
-			OutputFrametoFile(refinedVec, i, nAtom);
-
-			//timing start
-			//Bonder();
-			//timing end;
-
-
-
-			//frame counter
-			cout << "Finished frame: " << i << endl;
-
-			//final print of header for additional information
-			//dcdf.printHeader();
-			//cout << "After the print header at the end" << endl;
-
-			/* ... */
-
+				frameFile.close(); // close the frame output file to stop any bugs
+				Diffoutput.close();
 		}
-		frameFile.close(); // close the frame output file to stop any bugs
-		Diffoutput.close();
 	}
 	catch(std::bad_alloc& ba)
 	{
