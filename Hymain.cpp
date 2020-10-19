@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
-#include <fstream>
+#include <fstream>            //simple c++ libs
 #include <algorithm>
 #include <vector>
 #include <sstream>
 #include <istream>
-#include "array_tools.hpp"
-#include "dcd_r.hpp"
-#include "Compat.hpp"
+#include "array_tools.hpp"	  //hpp files for the arrays that the frame xyz information is stored in
+#include "dcd_r.hpp"		  //dcd reader hpp file which allows reading of .dcd files
+#include "Compat.hpp"         //hpp file to make Bonder methods available
 
 
 
@@ -19,24 +19,20 @@
 using namespace std;
 
 vector<string> atomtypes (0);
-ofstream frameFile;
+vector<double> atomdist(0);
+ofstream frameFile;				//global variables for file output and the types of the atoms from the pdb file
 ofstream Diffoutput;
 
-
-//int type2ix[56] = {0,1,0,0,2,0,0,1,1,0,3,0,0,2,2,0,1,1,0,1,0,0,0,0,0,1,1,1,1,2,2,2,3,3,4,0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,3,3,3,4,4,5};
-//int type2iy[56] = {0,0,1,0,0,2,0,1,0,1,0,3,0,1,0,2,2,0,1,1,0,1,2,3,4,0,1,2,3,0,1,2,0,1,0,0,1,2,3,4,5,0,1,2,3,4,0,1,2,3,0,1,2,0,1,0};
-//int type2iz[56] = {0,0,0,1,0,0,2,0,1,1,0,0,3,0,1,1,0,2,2,1,4,3,2,1,0,3,2,1,0,2,1,0,1,0,0,5,4,3,2,1,0,4,3,2,1,0,3,2,1,0,2,1,0,1,0,0};
-
-struct Coord
+struct Coord //struct for the Coord object. Holds all the information about the atom that might be needed for bonder to run.
 {
-	string type;
-	int atnum;
+	string type;	//this information is not stored in the .dcd file and is required from the .pdb file
+	int atnum;      //number of atom within the molecule (APOA1 has 92224 atoms so this is from 0 to 92223)
 	double x;
 	double y;
 	double z;
 };
 
-vector<string> readpdb()
+vector<string> readpdb()    //simple file reader for the .pdb file (it is in text format)
 {
 	string filename;
 	cout << "Type the filename of pdb file" << endl;
@@ -49,7 +45,6 @@ vector<string> readpdb()
 		while(getline(newfile, line))
 		{
 			int count =0;
-			//cout << line << "\n";
 			istringstream iss(line);
 			string s;
 			while(getline(iss,s,' '))
@@ -60,7 +55,6 @@ vector<string> readpdb()
 					{
 						break;
 					}
-					//cout << count << s << endl;
 					atomtypes.push_back(s);
 					count++;
 				}
@@ -68,11 +62,6 @@ vector<string> readpdb()
 		}
 		newfile.close();
 	}
-	/*
-	for(int i =0; i < 20; i++ ) //needs to use atomtypes.size()
-	{
-		cout << i << atomtypes.at(i) << endl;
-	}*/
 	return atomtypes;
 }
 
@@ -263,7 +252,12 @@ int main(int argc, char* argv[])
 					Coord secondAtom = atomsvec.at(atom2);
 					//offset for adding to the file
 					int dataAdd = 2;
+					double sqx = (firstAtom.x - secondAtom.x) * (firstAtom.x - secondAtom.x);
+					double sqy = (firstAtom.y - secondAtom.y) * (firstAtom.y - secondAtom.y);
+					double sqz = (firstAtom.z - secondAtom.z) * (firstAtom.z - secondAtom.z);
 
+					double dist = sqrt((sqx + sqz + sqy));
+					atomdist.push_back(dist);
 
 					for(int l = 0; l < nAtom; l++)
 					{
