@@ -32,6 +32,20 @@ struct Coord //struct for the Coord object. Holds all the information about the 
 	double z;
 };
 
+void OutputDistancetoFile(vector<double> atomdist, int numFrames)
+{
+	ofstream distOut;
+	string filename = "";
+	cout << "Output filename for the atom distances" << endl;
+	cin >> filename;
+	distOut.open(filename);
+	for(int i =0; i < numFrames; i++)
+	{
+		distOut << atomdist.at(i) << endl;
+	}
+
+}
+
 vector<string> readpdb()    //simple file reader for the .pdb file (it is in text format)
 {
 	string filename;
@@ -297,6 +311,7 @@ int main(int argc, char* argv[])
 					OutputRawFrametoFile(i, nAtom, atomsvec);
 					OutputFrametoFile(refinedVec, i, nAtom);
 
+
 					//timing start
 					//Bonder();
 					//timing end;
@@ -313,6 +328,7 @@ int main(int argc, char* argv[])
 					/* ... */
 
 				}
+				OutputDistancetoFile(atomdist, numFrames);
 				frameFile.close(); // close the frame output file to stop any bugs
 				Diffoutput.close();
 		}
