@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <signal.h>
+#include <time.h>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -18,63 +19,78 @@
 
 using namespace std;
 
-vector<string> atomtypes (0);
-vector<double> atomdist(0);
-ofstream frameFile;				//global variables for file output and the types of the atoms from the pdb file
-ofstream Diffoutput;
+
+//global variables
+vector<string> atomtypes (0); //vector for the atom types from the pdb file
+vector<double> atomdist(0);   //vector to store the distance between the target atoms for each frame
+ofstream frameFile;			  //output stream for the frames
+ofstream Diffoutput;		  //output stream for the difference output to detect all atoms in a certain radius of the target atoms
+clock_t t1, t2;				  //clock variables to measure the time it takes to call each iteration of Bonder
 
 struct Coord //struct for the Coord object. Holds all the information about the atom that might be needed for bonder to run.
 {
 	string type;	//this information is not stored in the .dcd file and is required from the .pdb file
 	int atnum;      //number of atom within the molecule (APOA1 has 92224 atoms so this is from 0 to 92223)
 	double x;
-	double y;
+	double y;		//doubles for storing the x,y and z coordinates
 	double z;
 };
 
-void OutputDistancetoFile(vector<double> atomdist, int numFrames)
+void OutputTime(int frames, vector<double> timing) //method to output the time taken to a file
 {
-	ofstream distOut;
-	string filename = "";
-	cout << "Output filename for the atom distances" << endl;
-	cin >> filename;
-	distOut.open(filename);
-	for(int i =0; i < numFrames; i++)
+	ofstream timeOut;							   //output stream for the timing file
+	string filename = "Runtimes.csv";			   //name of the timing file
+	timeOut.open(filename);                        //opening the time file
+	for(int i =0; i < frames; i++)				   //for loop to output each time in the array
 	{
-		distOut << atomdist.at(i) << endl;
+		timeOut << i << "," <<timing.at(i) << endl; //adding the data to the file
+	}
+
+
+}
+void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to output the distance between the target atoms
+{
+	ofstream distOut; 											//output stream for the distance file
+	string filename = "";										//filename variable
+	//cout << "Output filename for the atom distances" << endl;
+	cin >> filename;											//getting filename from the user
+	distOut.open(filename);										//opening the distance file
+	for(int i =0; i < numFrames; i++)							//for loop to output each distance
+	{
+		distOut << atomdist.at(i) << endl;						//adding data to the file
 	}
 
 }
 
 vector<string> readpdb()    //simple file reader for the .pdb file (it is in text format)
 {
-	string filename;
+	string filename;									//string for storing the name of the file
 	cout << "Type the filename of pdb file" << endl;
-	cin >> filename;
-	fstream newfile;
-	newfile.open(filename, ios::in);
-	if(newfile.is_open())
+	cin >> filename;									//getting user input of the file
+	fstream newfile;									//creating the stream to read the file
+	newfile.open(filename, ios::in);					//opening the file
+	if(newfile.is_open())								//if loop to check if the file is opened
 	{
-		string line;
-		while(getline(newfile, line))
+		string line;									//string for storing each line of data
+		while(getline(newfile, line))					//while loop to get the line from the file and store it in the variable.
 		{
-			int count =0;
-			istringstream iss(line);
-			string s;
-			while(getline(iss,s,' '))
+			int count =0;								//counter for the while loop
+			istringstream iss(line);					//converts the line of the file to a string stream
+			string s;									//string variable to store each value of the string stream
+			while(getline(iss,s,' '))					//while loop to read each token of the string stream
 			{
-				while(count == 0)
+				while(count == 0)						//while loop to check if the count is not 0
 				{
-					if(s.length() > 1)
+					if(s.length() > 1)					//checks for the column that has atom type in it
 					{
-						break;
+						break;							//breaks the while loop early when the string is too long to be an atom type
 					}
-					atomtypes.push_back(s);
-					count++;
+					atomtypes.push_back(s);				//push the string containing the atom type to the back of the atomtypes vector
+					count++;							//count variable to stop the while loop for that line of data
 				}
 			}
 		}
-		newfile.close();
+		newfile.close();								//closing the file to stop I/O errors
 	}
 	return atomtypes;
 }
@@ -82,24 +98,24 @@ vector<string> readpdb()    //simple file reader for the .pdb file (it is in tex
 void OutputDifferencetoFile(double xdiff, double ydiff, double zdiff, int frameCount)
 {
 	//outputting the differences to a file
-	Diffoutput << "Difference in Frames:" << frameCount-1 << " and: " << frameCount << endl;
-	Diffoutput << xdiff << ydiff << zdiff << endl;
+	Diffoutput << "Difference in Frames:" << frameCount-1 << " and: " << frameCount << endl; //outputting the difference to a file
+	Diffoutput << xdiff << ydiff << zdiff << endl;											 //outputting the actual difference values
 }
-void OutputRawFrametoFile(int currFrame, int numAtoms, vector<Coord> frames)
+void OutputRawFrametoFile(int currFrame, int numAtoms, vector<Coord> frames) //method for outputting raw frames to files
 {
-	ofstream rawfile;
-	string filename = "./Frames/Frame:";
-	filename += std::to_string(currFrame);
-	filename += ".txt";
-	rawfile.open(filename);
-	rawfile << numAtoms-1 << endl;
-	for(int i = 0; i<numAtoms; i++)
+	ofstream rawfile;						//output stream
+	string filename = "./Frames/Frame:";	//filename for file
+	filename += std::to_string(currFrame);	//adding the current frame number to file name
+	filename += ".txt";						//adding the last part of the filename
+	rawfile.open(filename);					//open the raw frame file
+	rawfile << numAtoms-1 << endl;			//output the number of atoms with one index taken off to stop out of bounds
+	for(int i = 0; i<numAtoms; i++)			//for loop to go through each frame
 	{
 		//string temptype ="";
 		//temptype = frames[i].type;
-		rawfile << frames[i].type << " " << frames[i].x << " " << frames[i].y << " " << frames[i].z << endl;
+		rawfile << frames[i].type << " " << frames[i].x << " " << frames[i].y << " " << frames[i].z << endl; //output each data point with the correct formatting
 	}
-	rawfile.close();
+	rawfile.close(); //close the file to prevent I/O output
 }
 void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 {
@@ -115,18 +131,14 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 
 	}
 }
-vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom)
+vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int currentFrame, vector<Coord> prevatom) //output for the difference of atoms arounf the target ones
 {
 	double xdiff = 0;
-	double zdiff = 0;
+	double zdiff = 0; //doubles to store the difference in the x,y and z values
 	double ydiff = 0;
-	if (currentFrame == 0)
+	if (currentFrame == 0) //if the current frame is the first one skip beacuse there is no difference calculation for the first frame
 	{
-		//cout << "Current Frame is 0" << endl;
-		for (int k = 0; k < numFrames; k++)
-		{
-			//cout << "Current atoms Coordinates: X:" << atoms[k].x << "Y:" << atoms[k].y << "Z:" << atoms[k].z << endl;
-		}
+		return atoms; //if the current frame is 0 there is only one frame that has been read in by the program and so nothing needs to be calculated.
 	}
 	else
 	{
@@ -164,17 +176,17 @@ vector<Coord> DifferenceCalculation(vector<Coord> atoms, int numFrames, int curr
 int main(int argc, char* argv[])
 {
 	try{
-		// instance of a new object DCD_R attached to a dcd file
 		string file = " ";
 		int atom1 = 0;
 		int atom2 = 0;
-		char version;
+		char version;           //variables to store various data and flags for the program
 		char diff;
 		char skip;
-		cout << "Do you want to skip processing a .dcd and .pdb file?  (Y/n)" << endl;
-		cin >> skip;
+		double time =0;
+		cout << "Do you want to skip processing a .dcd and .pdb file?  (Y/n)" << endl; //asking the user if they want to skip the processing of a .dcd as this only needs to happen once for each simulation
+		cin >> skip; //getting the user input
 
-		if(skip != 'Y')
+		if(skip != 'Y') //checking the user input to determine if .dcd processing is needed
 		{
 				//Get the user input for the dcd file and the atoms that want exploring
 				cout << "Name of .dcd file you want to process: " <<endl;
@@ -229,21 +241,15 @@ int main(int argc, char* argv[])
 				{
 
 					//Reads frame one by one and processes it
-					//cout<< "Getting Frame: " << i << endl;
 					dcdf.read_oneFrame();
-					//cout<< "Finished Getting Frame: " << i << endl;
 
-					//Your Code Goes Here
+					//######### Any code that will manipulate each frame that comes from the .dcd file can be written here ##########
 
 
 					//Getting x,y and z Co-ordinates and storing them in an array
-					//cout << "Getting the x y and z coords" << endl;
 					x = dcdf.getX();
 					y = dcdf.getY();
 					z = dcdf.getZ();
-					//cout << "Finished getting the x y z coords for the frame" << endl;
-					//cout << "for loop will run this many times:" << nAtom << endl;
-					//cout << "length of each of the arrays holding the coords" << endl;
 
 					//change the x,y,z coordinates into an atom struct that holds all the data
 					for(int k = 0; k < nAtom; k++)
@@ -266,11 +272,16 @@ int main(int argc, char* argv[])
 					Coord secondAtom = atomsvec.at(atom2);
 					//offset for adding to the file
 					int dataAdd = 2;
+					cout << firstAtom.x << "  " << firstAtom.y << "  " << firstAtom.z << endl;
+					cout << secondAtom.x << "  " <<secondAtom.y << "  " << secondAtom.z << endl;
+
+					//set up for calculating the Euclidean distance between the two target atoms
 					double sqx = (firstAtom.x - secondAtom.x) * (firstAtom.x - secondAtom.x);
 					double sqy = (firstAtom.y - secondAtom.y) * (firstAtom.y - secondAtom.y);
 					double sqz = (firstAtom.z - secondAtom.z) * (firstAtom.z - secondAtom.z);
-
+					//calculating the Euclidean distance for the target atoms for each frame
 					double dist = sqrt((sqx + sqz + sqy));
+					//push the distance to the back of an array
 					atomdist.push_back(dist);
 
 					for(int l = 0; l < nAtom; l++)
@@ -298,53 +309,45 @@ int main(int argc, char* argv[])
 							dataAdd ++;
 						}
 					}
-					//cout << "after the euclidean distance calculation" << endl;
-					if(diff == 'Y')
+					if(diff == 'Y') //checking the value of the "diff" flag
 					{
 						//Start moving from here and call the function from here
 						lastvec = DifferenceCalculation(atomsvec, numFrames,i,lastvec);
 					}
-
-
-					//cout << "if seen the error lies within the outputing frame to file function" << endl;
 					//outputting the frame to the file with the new atoms that have been filtered out by distance
 					OutputRawFrametoFile(i, nAtom, atomsvec);
 					OutputFrametoFile(refinedVec, i, nAtom);
-
-
-					//timing start
-					//Bonder();
-					//timing end;
-
-
-
-					//frame counter
+					//frame counter and output for user feedback
 					cout << "Finished frame: " << i << endl;
 
-					//final print of header for additional information
-					//dcdf.printHeader();
-					//cout << "After the print header at the end" << endl;
-
-					/* ... */
-
 				}
+				//call to output the distance of the two target atoms
 				OutputDistancetoFile(atomdist, numFrames);
 				frameFile.close(); // close the frame output file to stop any bugs
 				Diffoutput.close();
 		}
+		//vector to store the runtimes of each Bonder call
+		vector<double> timing(0);
+		//for loop to run foreach frame of the file
 		for(int i = 0; i < 250; i++)
 		{
-			std::string newfile = "Frames/Frame:";
-			newfile += std::to_string(i);
+			std::string newfile = "Frames/Frame:"; //string for the filename
+			newfile += std::to_string(i);		   //adding the number and the back end of the filename
 			newfile += ".txt";
+			t1 = clock();						//take the current program time just before the call to bonder
 			bond(argc, argv, newfile, i);
+			t2 = clock();						//take the current program time just after the call to bonder
+			time = (t2 - t1)/(CLOCKS_PER_SEC/(double) 1000.0);	//calculate the time in milliseconds
+			timing.push_back(time);								//push the data onto a vector for outputting to a file
+			cout << "Bonder ran in time: " << time << endl;		//print statement to show how long bonder takes each time
 		}
+		OutputTime(250, timing); //outputting the timings to a file
 	}
-	catch(std::bad_alloc& ba)
+	catch(std::bad_alloc& ba) //catch statement for any bad I/O errors
 	{
-		std::cerr << "Bad alloc Caught: " << ba.what() << endl;
+		std::cerr << "Bad alloc Caught: " << ba.what() << endl; //print the stack trace
 	}
-    return EXIT_SUCCESS;
+    return EXIT_SUCCESS; //return statement
 }
 
 
