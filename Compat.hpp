@@ -11,6 +11,8 @@
 #include <argp.h>
 #include <readwfn.h>
 
+
+//all the methods for the Bonder main class need to be here with the variables that are passed to the merhods otherwise other classes cannot call the methods
 static error_t parse_opt(int key, char *arg, struct argp_state *state);
 
 void drawline(int a, int b, double res, double cutoff,std::string outputfile,int size, wfnData* inputFile,int makeCube, int outputfilemod);

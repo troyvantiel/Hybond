@@ -6,6 +6,9 @@
 
 using namespace std;
 
+
+//output of a bad volume file
+//only gets called when the program tried to characterise more interactions than wnated which leads to very large volumes and runtimes.
 void volOutput(string file){
 		ofstream outputFile;
 		outputFile.open(file + "p.csv");
@@ -26,59 +29,12 @@ void volOutput(string file){
 
 }
 
-
+//standard Bonder output method
 void outputCube(double minx, double miny, double minz, double maxx, double maxy, double maxz, double res, string file, wfnData inputData,double cutoff,analysisBatch* batch,int makeCube)
 {
 	std::cout << "Called Output cube" << std::endl;
-	int maxL = 90;
-	/*int a = 0,b = 0;
-	//find which atoms the interaction is between
-	for (size_t i = 0; i < inputData.nuc; i++)
-	{
-		for (size_t j = 0; j < i; j++)
-		{
-			//std::cout << "inside double nested for loop" << std::endl;
-			double lowX = (inputData).x[i];
-			double lowY = (inputData).y[i];
-			double lowZ = (inputData).z[i];
 
-			double highX = (inputData).x[j];
-			double highY = (inputData).y[j];
-			double highZ = (inputData).z[j];
-			double l = ((highX - lowX)*(highX - lowX) + (highY - lowY)*(highY - lowY) + (highZ - lowZ)*(highZ - lowZ));
-
-			if (l > 80) 
-			{
-				break;
-			}
-			double jumpScaler = res / ((highZ - lowX)*(highZ - lowX) + (highY - lowY)*(highY - lowY) + (highZ - lowZ)*(highZ - lowZ));
-			//std::cout << "After the l 80 check" << std::endl;
-			double dx = (highX - lowX) * jumpScaler;
-			double dy = (highY - lowY) * jumpScaler;
-			double dz = (highZ - lowZ) * jumpScaler;
-			int reps = 1 / jumpScaler;
-			bool sucsess = false;
-			for (size_t k = 0; k < reps; k++)
-			{
-				if ((lowX + k*dx)< maxx && (lowX + k*dx)> minx && (lowY + k*dy)< maxy && (lowY + k*dy)> miny &&(lowZ + k*dz)< maxz && (lowZ + k*dz)> minz)
-				{
-					//std::cout << "if before the break" << std::endl;
-					if (l < maxL)
-					{
-						maxL = l;
-						a =i;
-						b = j;
-					}
-					break;
-				}
-			}
-
-		}
-	}
 	
-	
-	file += "-" + std::to_string(a) + inputData.name[a] + "-" + std::to_string(b) + inputData.name[b];*/
-	//std::cout << "after the file changes" << std::endl;
 	int dx = (maxx - minx) / res;
 	int dy = (maxy - miny) / res;
 	int dz = (maxz - minz) / res;
@@ -91,7 +47,7 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 	double *elfplus = new double[rdgLoops];
 	double *rhoplus = new double[rdgLoops];
 
-	double *kinEngminus = new double[rdgLoops];
+	double *kinEngminus = new double[rdgLoops]; //set up of all the variable vectors for outputting to the various files
 	double *potEngminus = new double[rdgLoops];
 	double *totEngminus = new double[rdgLoops];
 	double *pointsminus = new double[rdgLoops];
@@ -125,9 +81,9 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 	if (makeCube)
 		outputFilerho.open(file + ".cuberhosign");
 
+	//outputting to the cibe files for visulaising different parts of the molecule, such as the volume of the interaction that was looked at.
 	if (makeCube)
 	{
-		std::cout << "inside the if to add all the data to the files" << std::endl;
 		outputFile << endl << endl;
 		outputFile << "  " << inputData.nuc << "  " << minx << "  " << miny << "  " << minz << endl;
 		outputFile << "  " << (dx-1) / makeCube + 1 << "  " << res * makeCube << "  0  0" << endl;
@@ -142,7 +98,6 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 		//std::cout << "inputData.nuc: " << inputData.nuc << std::endl;
 		for (size_t i = 0; i < inputData.nuc; i++)
 		{
-			//std::cout<< "Just checking this loop is running: " << i <<std::endl;
 			outputFile << "  " << inputData.type[i] + 1 << "  " << inputData.type[i] + 1 << "  " << inputData.x[i] << "  " << inputData.y[i] << "  " << inputData.z[i] << endl;
 			outputFilerho << "  " << inputData.type[i] + 1 << "  " << inputData.type[i] + 1 << "  " << inputData.x[i] << "  " << inputData.y[i] << "  " << inputData.z[i] << endl;
 		}
@@ -252,8 +207,7 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 		outputFile.close();
 		outputFilerho.close();
 	}
-
-	std::cout << "just before the checking to of interactions" << std::endl;
+	//outputting the positive interactions to a file
 	if (pointsplus[rdgLoops - 1] != 0)
 	{
 		outputFile.open(file + "p.csv");
@@ -269,6 +223,7 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 		outputFile.close();
 	}
 
+	//outputting the negative(minus) interactions to a file
 	if (pointsminus[rdgLoops - 1] != 0)
 	{
 		outputFile.open(file + "m.csv");
@@ -285,6 +240,7 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 		outputFile.close();
 	}
 
+	//outputting the total interactions to a file
 	if (pointsplus[rdgLoops - 1] != 0 && pointsminus[rdgLoops - 1] != 0)
 	{
 		outputFile.open(file + "t.csv");
@@ -299,6 +255,8 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 		outputFile.close();
 	}
 
+
+	//releasing the vectors of data
 	delete [] kinEngplus;
 	delete [] potEngplus;
 	delete [] totEngplus;

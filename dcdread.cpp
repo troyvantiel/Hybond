@@ -31,23 +31,23 @@ DCD_R::DCD_R(const char filename[])
 
 void DCD_R::alloc()
 {
-	//cout << "in alloc before anything happens" << endl;
-	//cout << "number stored in NATOM = " << NATOM << endl;
 	X = new float[NATOM];
-	//cout << "after the first new float allocation" << endl;     //NOTE THESE 10000 NEED TO BE NATOM TO MAKE THE PROGRAM RUN COMPLETELY
 	Y = new float[NATOM];
 	Z = new float[NATOM];
 	pbc[0] = pbc[1] = pbc[2] = pbc[3] = pbc[4]= pbc[5] = 0.0;
 }
+
+
+//reads the header of the .dcd file which contains information such as the number of frames and the step size of the simulation
 void DCD_R::read_header()
 {
-	unsigned int fortcheck1, fortcheck2;
-		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
+	unsigned int fortcheck1, fortcheck2;  //fortran checks on that data. These are two numbers at the start and end of each block of data and should match.
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 
 		dcdf.read((char*)HDR,sizeof(char)*4);
 		dcdf.read((char*)ICNTRL,sizeof(int)*20);
 
-		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));			//FORT CHECK NEEDS UNCOMMENT
+		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 		HDR[4] = '\0';
 		NFILE = ICNTRL[0];
@@ -55,17 +55,12 @@ void DCD_R::read_header()
 		NSAVC = ICNTRL[2];
 		NSTEP = ICNTRL[3];
 		NDEGF = ICNTRL[7]; //Structure of the CHARMM header in the file
-		FROZAT = ICNTRL[8];
+		FROZAT = ICNTRL[8];//has worked for NAMD simulation of APOA1 so far
 		DELTA4 = ICNTRL[9];
 		QCRYS = ICNTRL[10];
 		CHARMV = ICNTRL[19];
 
-
-
-
-
-
-		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));    //FORT CHECK NEEDS UNCOMMENT
+		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)&NTITLE, sizeof(int));
 
 		if(NTITLE == 0)
@@ -82,25 +77,26 @@ void DCD_R::read_header()
 			}
 			TITLE[NTITLE*80] = '\0';
 		}
-		dcdf.read((char*)&fortcheck2, sizeof(unsigned int));            //FORT CHECK NEEDS UNCOMMENT
+		dcdf.read((char*)&fortcheck2, sizeof(unsigned int));
 		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 
 
 
-	//Reading number of atoms
+		//Reading number of atoms
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)&NATOM,sizeof(int));
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORT CHECK UNCOMMENT
+		checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 
-		LNFREAT = NATOM - FROZAT;
+		LNFREAT = NATOM - FROZAT; //calculation of the number of free atoms in the molecule.
 		if(LNFREAT != NATOM)
 		{
+			//reading the number of free atoms in the molecule
 			FREEAT = new int[LNFREAT];
 			dcdf.read((char*)&fortcheck1, sizeof(unsigned int));
 			dcdf.read((char*)FREEAT, sizeof(int)*LNFREAT);
 			dcdf.read((char*)&fortcheck2, sizeof(unsigned int));
-			checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORT CHECK UNCOMMENT
+			checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 		}
 		alloc();
 
@@ -108,43 +104,32 @@ void DCD_R::read_header()
 
 void DCD_R::read_oneFrame()
 {
-	//try
-	//{
-		unsigned int fortcheck1, fortcheck2 =0;
+	unsigned int fortcheck1, fortcheck2 =0;
 
 	int siz = (dcd_first_read) ? NATOM : LNFREAT;
-	//int siz = LNFREAT;
-	//cout << "SHOW ME THE SIZE BEING ALLOCATED TO TEMP ARRAYS" << siz << endl;
 	float *tmpX = new float[siz];
-	float *tmpY = new float[siz];
+	float *tmpY = new float[siz];	//allocation
 	float *tmpZ = new float[siz];
 		if(QCRYS)
 		{
-			//cout<<"QCHRYS count was greater than 0" << endl;
 			dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-			dcdf.read((char*)pbc,sizeof(double)* 6);
+			dcdf.read((char*)pbc,sizeof(double)* 6);		//read the data that comes along if the QCRYS flag is set
 			dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-			//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2); //FORTCHECK UNCOMMENT
+			//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 		}
-			//X
-		//cout <<"Reading co-ordinates" << endl;
-		//cout <<"***fortcheck1***"<< endl;
+			//reading of the x coordinate from the frame
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
-		//cout<< "fortcheck1: " << fortcheck1<<endl;
-		//cout << "*****reading x*****" <<endl;
 		dcdf.read((char*)tmpX,sizeof(float)*siz);
-		//cout << "***fortcheck2***"<<endl;
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
-		//cout<< "fortcheck2: " << fortcheck2 << endl;
 		//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
-		//cout<<"finished getting x co-ords"<<endl;
-		//Y
+
+		//reading of the y coordinate from the frame
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)tmpY,sizeof(float)*siz);
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
 		//checkFortranIOerror(__FILE__,__LINE__,fortcheck1,fortcheck2);
 
-		//Z
+		//reading of the z coordinate from the frame
 		dcdf.read((char*)&fortcheck1,sizeof(unsigned int));
 		dcdf.read((char*)tmpZ,sizeof(float)*siz);
 		dcdf.read((char*)&fortcheck2,sizeof(unsigned int));
