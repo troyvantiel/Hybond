@@ -48,6 +48,12 @@ void OutputTime(int frames, vector<double> timing) //method to output the time t
 
 
 }
+
+void bondAngle() //method signature to be called to calculate the angle of the hydrogen bond as this has been shown to effect the energy of the bond
+{
+
+}
+
 void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to output the distance between the target atoms
 {
 	ofstream distOut; 											//output stream for the distance file
