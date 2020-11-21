@@ -32,7 +32,7 @@ void volOutput(string file){
 //standard Bonder output method
 void outputCube(double minx, double miny, double minz, double maxx, double maxy, double maxz, double res, string file, wfnData inputData,double cutoff,analysisBatch* batch,int makeCube)
 {
-	std::cout << "Called Output cube" << std::endl;
+	//std::cout << "Called Output cube" << std::endl;
 
 	
 	int dx = (maxx - minx) / res;
@@ -54,11 +54,11 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 	double *elfminus = new double[rdgLoops];
 	double *rhominus = new double[rdgLoops];
 
-	cout << makeCube << endl;
+	//cout << makeCube << endl;
 
 	for (size_t i = 0; i < rdgLoops; i++)
 	{
-		std::cout << "just under the 1 print line" << std::endl;
+		//std::cout << "just under the 1 print line" << std::endl;
 		kinEngplus[i] =0;
 		potEngplus[i] =0;
 		totEngplus[i] = 0;

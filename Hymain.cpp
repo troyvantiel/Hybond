@@ -272,8 +272,8 @@ int main(int argc, char* argv[])
 					Coord secondAtom = atomsvec.at(atom2);
 					//offset for adding to the file
 					int dataAdd = 2;
-					cout << firstAtom.x << "  " << firstAtom.y << "  " << firstAtom.z << endl;
-					cout << secondAtom.x << "  " <<secondAtom.y << "  " << secondAtom.z << endl;
+					//cout << firstAtom.x << "  " << firstAtom.y << "  " << firstAtom.z << endl;
+					//cout << secondAtom.x << "  " <<secondAtom.y << "  " << secondAtom.z << endl;
 
 					//set up for calculating the Euclidean distance between the two target atoms
 					double sqx = (firstAtom.x - secondAtom.x) * (firstAtom.x - secondAtom.x);
@@ -318,8 +318,10 @@ int main(int argc, char* argv[])
 					OutputRawFrametoFile(i, nAtom, atomsvec);
 					OutputFrametoFile(refinedVec, i, nAtom);
 					//frame counter and output for user feedback
-					cout << "Finished frame: " << i << endl;
-
+					if (i % 10 == 0)
+					{
+						cout << "Finished frame: " << i << endl;
+					}
 				}
 				//call to output the distance of the two target atoms
 				OutputDistancetoFile(atomdist, numFrames);
@@ -331,6 +333,7 @@ int main(int argc, char* argv[])
 		//for loop to run foreach frame of the file
 		for(int i = 0; i < 250; i++)
 		{
+			cout << "Current Frame Being Processed: " << i << endl;
 			std::string newfile = "Frames/Frame:"; //string for the filename
 			newfile += std::to_string(i);		   //adding the number and the back end of the filename
 			newfile += ".txt";
@@ -339,7 +342,7 @@ int main(int argc, char* argv[])
 			t2 = clock();						//take the current program time just after the call to bonder
 			time = (t2 - t1)/(CLOCKS_PER_SEC/(double) 1000.0);	//calculate the time in milliseconds
 			timing.push_back(time);								//push the data onto a vector for outputting to a file
-			cout << "Bonder ran in time: " << time << endl;		//print statement to show how long bonder takes each time
+			cout << "Runtime of the Bonder call for the Frame: " << time << endl;		//print statement to show how long bonder takes each time
 		}
 		OutputTime(250, timing); //outputting the timings to a file
 	}

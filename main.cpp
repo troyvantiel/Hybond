@@ -154,12 +154,12 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 	double highZ = (*inputFile).z[b];
 
 
-	std::cout << "testing line with atom coords of:" <<std::endl;
-	std::cout << "LowX: " << lowX << " LowY: " << lowY << " LowZ: " << lowZ << std::endl;         //these comments are added in by me
-	std::cout << "HighX: " << highX << " HighY: " << highY << " HighZ: " << highZ << std::endl;
+	//std::cout << "testing line with atom coords of:" <<std::endl;
+	//std::cout << "LowX: " << lowX << " LowY: " << lowY << " LowZ: " << lowZ << std::endl;         //these comments are added in by me
+	//std::cout << "HighX: " << highX << " HighY: " << highY << " HighZ: " << highZ << std::endl;
 
 
-	printf("testing line between %d and %d\n",a,b);
+	//printf("testing line between %d and %d\n",a,b);
 	if (((highX - lowX)*(highX - lowX) + (highY - lowY)*(highY - lowY) + (highZ - lowZ)*(highZ - lowZ)) > 100)
 	{
 		return;
@@ -177,7 +177,7 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 
 	//printf("%d\n",reps);
 	int flips = 1;
-	printf("size of reps which analizes a point everytime is %d\n", reps);
+	//printf("size of reps which analizes a point everytime is %d\n", reps);
 
 	double lowest = 9999;
 
@@ -190,7 +190,7 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 			lowest = mesured;
 		if (mesured <= cutoff)
 		{
-			std::cout << "found point" << std::endl;
+			//std::cout << "found point" << std::endl;
 
 			analysis analize = analysis();
 			analize.setUpAnalysisBatch(lowX + k*dx, lowY + k*dy, lowZ + k*dz, res,batch);
@@ -200,7 +200,7 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 			break;
 		}
 	}
-	std::cout << lowest << std::endl;
+	//std::cout << lowest << std::endl;
 
 	delete batch;
 }
@@ -384,7 +384,7 @@ void useInputFile(char* filename)
 	if(lineNum == 0)
 	{
 		std::cout << "the input file needs text" <<  std::endl;
-		printf("bonder h for help\n");
+		//printf("bonder h for help\n");
 		return;
 	}
 
@@ -577,7 +577,7 @@ void bond(int argc, char* argv[], std::string newfile, int outputfilemod) //was 
 			//return 1;
 		}
 
-	std::cout << "data read" << std::endl;
+	//std::cout << "data read" << std::endl;
 	//letter file x y z res cutoff
 	if (arguments.type[0] == 'p')
 	{
@@ -601,7 +601,7 @@ void bond(int argc, char* argv[], std::string newfile, int outputfilemod) //was 
 	//letter file 1 2 res cutoff
 	if (arguments.type[0] == 'l')
 	{
-		std::cout << "selected Line calculation" << std::endl;
+		std::cout << "Line Calculation Selected" << std::endl;
 		drawline(arguments.atom1, arguments.atom2, arguments.res, arguments.cutoff, arguments.output, SIZE, inputFile, arguments.cubesize, outputfilemod);
 		//return 0;
 
@@ -642,7 +642,7 @@ void bond(int argc, char* argv[], std::string newfile, int outputfilemod) //was 
 	//bool sucsess;
 	//anilizePoint(0, 0, 0, 0, 2000, 2000, 2501, &sucsess);
 	//printf("%d", sucsess);
-	printf("bonder h for help\n");
+	//printf("bonder h for help\n");
 	//return 0;
 }
 

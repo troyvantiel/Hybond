@@ -73,14 +73,14 @@ void analysis::anilizePoint(int x, int y, int z, void * other, int Xsize, int Ys
 	
 
 	(*batch).cull(offsetx,offsety,offsetz);	
-	printf("starting filling at %f %f %f\n", offsetx, offsety, offsetz);
+	//printf("starting filling at %f %f %f\n", offsetx, offsety, offsetz);
 	grid results = fill(x,y,z,other,Xsize,Ysize,cutOff,sucsess,batch);
 	if (!*sucsess)
 	{
 		printf("fail\n");
 		return;
 	}
-	printf("finished filling\n");
+	printf("Finished Filling\n");
 	int maxX=x, maxY=y, maxZ=0, minX=x, minY=y, minZ=0;
 	int vol = 0;
 	gridPoint currentPoint;
@@ -157,8 +157,8 @@ void analysis::anilizePoint(int x, int y, int z, void * other, int Xsize, int Ys
 	//(*centers).remove(thisPoint);
 	mutexCenters.unlock();
 
-	printf("drawing grid at %f %f %f, %f %f %f\n", minX* res + offsetx, minY* res + offsety, minZ* res + offsetz, maxX* res + offsetx, maxY* res + offsety, maxZ* res + offsetz);
-	printf("volume is  %f\n", vol*res*res*res);
+	//printf("drawing grid at %f %f %f, %f %f %f\n", minX* res + offsetx, minY* res + offsety, minZ* res + offsetz, maxX* res + offsetx, maxY* res + offsety, maxZ* res + offsetz);
+	//printf("volume is  %f\n", vol*res*res*res);
 	if((vol*res*res*res) < 5 && (vol*res*res*res) > 0)
 	{
 		if (!(outputFile.empty()))

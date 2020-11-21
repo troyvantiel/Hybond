@@ -150,7 +150,7 @@ double analysisBatch::getSignOfSecondEiganVaule()
 	if (p1 == 0)
 	{
 		// A is diagonal.
-		printf("does this happen?");
+		//printf("does this happen?");
 		eigan[0] = A(1, 1);
 		eigan[1] = A(2, 2);
 		eigan[2] = A(3, 3);
