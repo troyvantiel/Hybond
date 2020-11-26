@@ -602,7 +602,7 @@ void bond(int argc, char* argv[], std::string newfile, int outputfilemod) //was 
 	if (arguments.type[0] == 'l')
 	{
 		std::cout << "Line Calculation Selected" << std::endl;
-		drawline(arguments.atom1, arguments.atom2, arguments.res, arguments.cutoff, arguments.output, SIZE, inputFile, arguments.cubesize, outputfilemod);
+		drawline(arguments.atom1-2, arguments.atom2-2, arguments.res, arguments.cutoff, arguments.output, SIZE, inputFile, arguments.cubesize, outputfilemod);
 		//return 0;
 
 	}
