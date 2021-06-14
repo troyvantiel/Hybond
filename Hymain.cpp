@@ -56,6 +56,7 @@ void bondAngle() //method signature to be called to calculate the angle of the h
 
 void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to output the distance between the target atoms
 {
+	cout << "Outputting distances to a file" << endl;
 	ofstream distOut; 											//output stream for the distance file
 	string filename = "";										//filename variable
 	//cout << "Output filename for the atom distances" << endl;
