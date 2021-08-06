@@ -58,12 +58,41 @@ void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to ou
 {
 	cout << "Outputting distances to a file" << endl;
 	ofstream distOut; 											//output stream for the distance file
+
+	bool atomDistFlag = true;
+	int longDistCount = 0;
+	string distInput = "";
+
 	string filename = "";										//filename variable
 	cout << "Output filename for the atom distances" << endl;
 	cin >> filename;											//getting filename from the user
 	distOut.open(filename);										//opening the distance file
 	for(int i =0; i < numFrames; i++)							//for loop to output each distance
 	{
+		if(atomDistFlag == true)
+		{
+			if(atomdist.at(i) > 5)
+			{
+				longDistCount++;
+				if(longDistCount > 30)
+				{
+					cout << "30 long distance hydrogen bonds have been detected" << endl;
+					cout << "Do you want to Continue? (y/n)" << endl;//ask the user if they want to continue knowing that the bond is not well defined
+					cin >> distInput;
+					if(distInput.compare("n"))
+					{
+						exit(0);
+						//if the answer is no kill the program if it is yes carry on.
+					}
+					else
+					{
+						atomDistFlag = false;
+					}
+
+				}
+			}
+		}
+
 		distOut << atomdist.at(i) << endl;						//adding data to the file
 	}
 
