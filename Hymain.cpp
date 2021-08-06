@@ -59,7 +59,7 @@ void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to ou
 	cout << "Outputting distances to a file" << endl;
 	ofstream distOut; 											//output stream for the distance file
 	string filename = "";										//filename variable
-	//cout << "Output filename for the atom distances" << endl;
+	cout << "Output filename for the atom distances" << endl;
 	cin >> filename;											//getting filename from the user
 	distOut.open(filename);										//opening the distance file
 	for(int i =0; i < numFrames; i++)							//for loop to output each distance
@@ -279,6 +279,7 @@ int main(int argc, char* argv[])
 					Coord secondAtom = atomsvec.at(atom2);
 					//offset for adding to the file
 					int dataAdd = 2;
+					//cout << "first and second atom coordinates picked" << endl;
 					//cout << firstAtom.x << "  " << firstAtom.y << "  " << firstAtom.z << endl;
 					//cout << secondAtom.x << "  " <<secondAtom.y << "  " << secondAtom.z << endl;
 
@@ -338,7 +339,7 @@ int main(int argc, char* argv[])
 		//vector to store the runtimes of each Bonder call
 		vector<double> timing(0);
 		//for loop to run foreach frame of the file
-		for(int i = 0; i < 250; i++)
+		for(int i = 0; i < 500; i++)
 		{
 			cout << "Current Frame Being Processed: " << i << endl;
 			std::string newfile = "Frames/Frame:"; //string for the filename

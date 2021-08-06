@@ -154,12 +154,12 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 	double highZ = (*inputFile).z[b];
 
 
-	//std::cout << "testing line with atom coords of:" <<std::endl;
-	//std::cout << "LowX: " << lowX << " LowY: " << lowY << " LowZ: " << lowZ << std::endl;         //these comments are added in by me
-	//std::cout << "HighX: " << highX << " HighY: " << highY << " HighZ: " << highZ << std::endl;
+	std::cout << "testing line with atom coords of:" <<std::endl;
+	std::cout << "LowX: " << lowX*0.52917721092 << " LowY: " << lowY*0.52917721092 << " LowZ: " << lowZ*0.52917721092 << std::endl;         //these comments are added in by me
+	std::cout << "HighX: " << highX*0.52917721092 << " HighY: " << highY*0.52917721092 << " HighZ: " << highZ*0.52917721092 << std::endl;
 
 
-	//printf("testing line between %d and %d\n",a,b);
+	printf("testing line between %d and %d\n",a,b);
 	if (((highX - lowX)*(highX - lowX) + (highY - lowY)*(highY - lowY) + (highZ - lowZ)*(highZ - lowZ)) > 100)
 	{
 		return;
@@ -194,7 +194,7 @@ void drawline(int a, int b, double res, double cutoff,std::string outputfile,int
 
 			analysis analize = analysis();
 			analize.setUpAnalysisBatch(lowX + k*dx, lowY + k*dy, lowZ + k*dz, res,batch);
-			outputfile += "./Output/Frame:" + std::to_string(outputfilemod);
+			outputfile += "output" + std::to_string(outputfilemod);
 			analize.anilizePoint(0, 0, 0, 0, size, size, cutoff, &sucsess, inputFile, outputfile, batch,makeCube);
 			
 			break;
@@ -552,6 +552,7 @@ void useInputFile(char* filename)
 
 void bond(int argc, char* argv[], std::string newfile, int outputfilemod) //was int main
 {
+	std::cout << "Start of bond method" << std::endl;
 	struct arguments arguments;
 	argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
@@ -579,6 +580,7 @@ void bond(int argc, char* argv[], std::string newfile, int outputfilemod) //was 
 
 	//std::cout << "data read" << std::endl;
 	//letter file x y z res cutoff
+		std::cout << "Selecting which calculation type to use" << std::endl;
 	if (arguments.type[0] == 'p')
 	{
 		bool sucsess;

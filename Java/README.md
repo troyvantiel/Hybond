@@ -9,5 +9,5 @@ __Usage:__
 + Argument 4 = Name of the output file
 + Argument 5 = the type of file being read (options are)  
   * m - minus interaction (attractive)
-  * p - positive interaction (repulsive)               
+  * p -  positive interaction (repulsive)               
   * t - total interaction (sum of previous files)

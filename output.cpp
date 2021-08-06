@@ -73,7 +73,7 @@ void outputCube(double minx, double miny, double minz, double maxx, double maxy,
 		elfminus[i] = 0;
 		rhominus[i] = 0;
 	}
-
+	cout <<"file line: " + file << endl;
 	ofstream outputFile;
 	if (makeCube)
 		outputFile.open(file + ".cuberdg");

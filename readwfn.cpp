@@ -69,7 +69,6 @@ int selectAtom(std::string name,int line)
 
 wfnData* readFile(string file)
 {
-	
 	wfnData* output = new wfnData;
 	ifstream inputFile(file);
 	
@@ -95,8 +94,9 @@ wfnData* readFile(string file)
 		tokens = split(line,' ');
 		//conver to au
 		output->x[i] = stod(tokens[1]) / 0.52917721092;
-		output->y[i] = stod(tokens[2]) / 0.52917721092;    //this division is a conversion of coordinates of some sort.
+		output->y[i] = stod(tokens[2]) / 0.52917721092; //this division is a conversion of coordinates of some sort.
 		output->z[i] = stod(tokens[3]) / 0.52917721092;
+
 		output->type[i] = selectAtom(tokens[0],i);
 		output->name[i] = tokens[0];
 	}
