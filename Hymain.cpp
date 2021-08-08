@@ -101,7 +101,7 @@ void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to ou
 vector<string> readpdb()    //simple file reader for the .pdb file (it is in text format)
 {
 	string filename;									//string for storing the name of the file
-	cout << "Type the filename of pdb file" << endl;
+	cout << "Type the filename of xyz file" << endl;
 	cin >> filename;									//getting user input of the file
 	fstream newfile;									//creating the stream to read the file
 	newfile.open(filename, ios::in);					//opening the file
