@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
 						double firstDist = sqrt((fsqx) + (fsqy) + (fsqz)); //calculating the distance the atom is from the selected ones
 						double secondDist = sqrt((ssqx) +(ssqy) + (ssqz));
 
-						if(firstDist <= 5 || secondDist <= 5) //filtering out all the needed atoms
+						if(firstDist <= 2 || secondDist <= 2) //filtering out all the needed atoms
 						{
 							refinedVec.at(0) = atomsvec.at(atom1); //adding the original picked atoms before the rest of the considered atoms
 							refinedVec.at(1) = atomsvec.at(atom2);
