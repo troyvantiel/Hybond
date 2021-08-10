@@ -20,7 +20,7 @@
 using namespace std;
 
 
-//global variables
+//global variables.
 vector<string> atomtypes (0); //vector for the atom types from the pdb file
 vector<double> atomdist(0);   //vector to store the distance between the target atoms for each frame
 ofstream frameFile;			  //output stream for the frames
