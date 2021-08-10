@@ -49,8 +49,15 @@ void OutputTime(int frames, vector<double> timing) //method to output the time t
 
 }
 
-void bondAngle() //method signature to be called to calculate the angle of the hydrogen bond as this has been shown to effect the energy of the bond
+void bondAngle(Coord Atom1, Coord Atom2, Coord Atom3) //method signature to be called to calculate the angle of the hydrogen bond as this has been shown to effect the energy of the bond
 {
+			//Takes three atoms with the hydrogen atom in the middle. This will allow the angle to be calculated using the law of Cosines at the vertex which will be the
+			//point at which the hydrogen atom sits.
+			//Formula is as follows arccos((P12^2 + P13^2 - P23^2) / (2 * P12 * P13))
+			//Where P12 is the length of the bond from Atom 1 to Atom 2 and P13 is the length from Atom1 to Atom3
+			//Calculated by sqrt((P1x- P2x)^2 + (P1y- P2y)^2 + (P1z- P2z)^2)
+
+
 
 }
 
@@ -215,11 +222,12 @@ int main(int argc, char* argv[])
 		string file = " ";
 		int atom1 = 0;
 		int atom2 = 0;
+
 		char version;           //variables to store various data and flags for the program
 		char diff;
 		char skip;
 		double time =0;
-		cout << "Do you want to skip processing a .dcd and .pdb file?  (Y/n)" << endl; //asking the user if they want to skip the processing of a .dcd as this only needs to happen once for each simulation
+		cout << "Do you want to SKIP processing a .dcd and .pdb file?  (Y/n)" << endl; //asking the user if they want to skip the processing of a .dcd as this only needs to happen once for each simulation
 		cin >> skip; //getting the user input
 
 		if(skip != 'Y') //checking the user input to determine if .dcd processing is needed
@@ -321,6 +329,9 @@ int main(int argc, char* argv[])
 					//push the distance to the back of an array
 					atomdist.push_back(dist);
 
+					//pass the information for the angle calculation here (3 atoms of data and return/print the angle to a file)
+
+
 					for(int l = 0; l < nAtom; l++)
 					{
 						//start writing method for the code in the loop
@@ -389,13 +400,3 @@ int main(int argc, char* argv[])
 	}
     return EXIT_SUCCESS; //return statement
 }
-
-
-
-
-
-
-
-
-
-
