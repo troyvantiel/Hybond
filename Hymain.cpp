@@ -164,7 +164,7 @@ void OutputFrametoFile(vector<Coord> atom, int frameCount, int numAtoms)
 {
 	 //all writing needs to happen after the open and before the close.
 	//frameFile << "Current Frame Printed: " << frameCount << endl;
-	frameFile << numAtoms << endl;
+	frameFile << "Frame Number: " << frameCount << endl;
 	for(int i = 0; i < numAtoms; i++)
 	{
 		if(atom[i].x != 0 && atom[i].y != 0 && atom[i].z) //stop zeros beinng written to file (vector is filled up with 0,0,0)
@@ -223,11 +223,17 @@ int main(int argc, char* argv[])
 		int atom1 = 0;
 		int atom2 = 0;
 
+		int bondAtom1 = 0;
+		int bondAtom2 = 0;	//These are the variables used to store the atoms that will be used in the bond angle calculation (The hydrogen needs to be at the vertice (bondAtom2) for the calculation to work)
+		int bondAtom3 = 0;
+
 		char version;           //variables to store various data and flags for the program
 		char diff;
 		char skip;
+		char proximityUserCheck;
+		char bondAngleUserCheck;
 		double time =0;
-		cout << "Do you want to SKIP processing a .dcd and .pdb file?  (Y/n)" << endl; //asking the user if they want to skip the processing of a .dcd as this only needs to happen once for each simulation
+		cout << "Do you want to SKIP processing a .dcd and .pdb file?  (Y/N)" << endl; //asking the user if they want to skip the processing of a .dcd as this only needs to happen once for each simulation
 		cin >> skip; //getting the user input
 
 		if(skip != 'Y') //checking the user input to determine if .dcd processing is needed
@@ -237,7 +243,7 @@ int main(int argc, char* argv[])
 				cin >> file;
 				//cout << "Software used to create file: ('N' for NAMD or 'C' for CHARMM)" << endl;
 				//cin >> version;
-				cout << "Enable Difference Output: (Warning large file size) Y/n"<< endl;
+				cout << "Enable Frame Difference Output: (Warning large file size) Y/n"<< endl;
 				cin >> diff;
 
 				//convert the filename into a string and read dcd file from that name
@@ -263,6 +269,31 @@ int main(int argc, char* argv[])
 
 				//prints the variables that were chosen by the user
 				cout << "Variables are as follows: " << file << " ### " << atom1 << " ### " << atom2 << " ### " << endl;
+
+				cout << "Enable Proximity Check on Selected Atoms (Y/N)" << endl;
+				cin >> proximityUserCheck;
+
+				if(proximityUserCheck == 'Y')
+				{
+					cout << "Proximity Check Enabled" << endl;
+
+				}
+
+				cout << "Enable Hydrogen Bond Angle Calculation (Y/N)" << endl;
+				cin >> bondAngleUserCheck;
+
+				if(bondAngleUserCheck == 'Y')
+				{
+					cout << "Bond Angle Calculation Enabled" << endl;
+					cout << "Please Enter the Number of the three atoms the angle contains (Warning: The hydrogen must be the middle atom)" << endl;
+					cout << "First atom: ";
+					cin >> bondAtom1;
+					cout << "Second atom (Must be Hydrogen atom): ";
+					cin >> bondAtom2;
+					cout << "Third atom: ";
+					cin >>bondAtom3;
+				}
+
 
 				 //make the const float varibles to store the coordinates.
 				const float *x,*y,*z;
@@ -364,7 +395,11 @@ int main(int argc, char* argv[])
 					}
 					//outputting the frame to the file with the new atoms that have been filtered out by distance
 					OutputRawFrametoFile(i, nAtom, atomsvec);
-					OutputFrametoFile(refinedVec, i, nAtom);
+					if(proximityUserCheck == 'Y')
+					{
+											OutputFrametoFile(refinedVec, i, nAtom);
+					}
+
 					//frame counter and output for user feedback
 					if (i % 10 == 0)
 					{
