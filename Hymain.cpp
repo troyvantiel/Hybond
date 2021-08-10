@@ -14,7 +14,7 @@
 #include "dcd_r.hpp"		  //dcd reader hpp file which allows reading of .dcd files
 #include "Compat.hpp"         //hpp file to make Bonder methods available
 
-
+#define PI 3.14159265
 
 
 using namespace std;
@@ -25,7 +25,9 @@ vector<string> atomtypes (0); //vector for the atom types from the pdb file
 vector<double> atomdist(0);   //vector to store the distance between the target atoms for each frame
 ofstream frameFile;			  //output stream for the frames
 ofstream Diffoutput;		  //output stream for the difference output to detect all atoms in a certain radius of the target atoms
+ofstream Angleoutput;    //output stream for the angle output
 clock_t t1, t2;				  //clock variables to measure the time it takes to call each iteration of Bonder
+
 
 struct Coord //struct for the Coord object. Holds all the information about the atom that might be needed for bonder to run.
 {
@@ -45,19 +47,41 @@ void OutputTime(int frames, vector<double> timing) //method to output the time t
 	{
 		timeOut << i << "," <<timing.at(i) << endl; //adding the data to the file
 	}
-
+	timeOut.close();
 
 }
-
+double calcEuclDist (Coord Atom1, Coord Atom2)
+{
+	double sqx = (Atom1.x - Atom2.x) * (Atom1.x - Atom2.x);
+	double sqy = (Atom1.y - Atom2.y) * (Atom1.y - Atom2.y);
+	double sqz = (Atom1.z - Atom2.z) * (Atom1.z - Atom2.z);
+	double dist = sqrt((sqx + sqz + sqy));
+	return dist;
+}
 void bondAngle(Coord Atom1, Coord Atom2, Coord Atom3) //method signature to be called to calculate the angle of the hydrogen bond as this has been shown to effect the energy of the bond
 {
 			//Takes three atoms with the hydrogen atom in the middle. This will allow the angle to be calculated using the law of Cosines at the vertex which will be the
 			//point at which the hydrogen atom sits.
-			//Formula is as follows arccos((P12^2 + P13^2 - P23^2) / (2 * P12 * P13))
+			//Formula is as follows arccos((P23^2 + P12^2 - P13^2) / (2 * P12 * P23))
 			//Where P12 is the length of the bond from Atom 1 to Atom 2 and P13 is the length from Atom1 to Atom3
 			//Calculated by sqrt((P1x- P2x)^2 + (P1y- P2y)^2 + (P1z- P2z)^2)
 
 
+			double A12 = calcEuclDist(Atom1, Atom2);
+			double A13 = calcEuclDist(Atom1, Atom3);
+			double A23 = calcEuclDist(Atom2, Atom3);
+			double A12squared = A12 * A12;
+			double A13squared = A13 * A13;
+			double A23squared = A23 * A23;
+
+			double calcAngleRad = acos((A23squared + A12squared - A13squared) / (2 * A12 * A23));
+			double calcAngleDeg = calcAngleRad * 180/ PI;
+
+			Angleoutput << calcAngleDeg << endl;
+
+			//These two lines can be used to check the output straight from the console
+			//cout << "Angle of the Hydrogen bond in degrees: " << calcAngleDeg << endl;
+			//cout << "Angle of the Hydrogen bond in radians: " << calcAngleRad << endl;
 
 }
 
@@ -102,7 +126,7 @@ void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to ou
 
 		distOut << atomdist.at(i) << endl;						//adding data to the file
 	}
-
+	distOut.close();
 }
 
 vector<string> readpdb()    //simple file reader for the .pdb file (it is in text format)
@@ -311,6 +335,7 @@ int main(int argc, char* argv[])
 				//Open files to be used by the frame and difference output
 				frameFile.open ("Frames.txt");
 				Diffoutput.open("DiffOut.txt");
+				Angleoutput.open("AngleOutput.txt");
 				// in this loop the coordinates are read frame by frame
 				for(int i=0; i < numFrames; i++)
 				{
@@ -361,6 +386,11 @@ int main(int argc, char* argv[])
 					atomdist.push_back(dist);
 
 					//pass the information for the angle calculation here (3 atoms of data and return/print the angle to a file)
+					//get the atoms out of the array for calculating the bond angle.
+					Coord bA1 = atomsvec.at(bondAtom1);
+					Coord bA2 = atomsvec.at(bondAtom2);
+					Coord bA3 = atomsvec.at(bondAtom3);
+					bondAngle(bA1, bA2, bA3);
 
 
 					for(int l = 0; l < nAtom; l++)
@@ -410,6 +440,7 @@ int main(int argc, char* argv[])
 				OutputDistancetoFile(atomdist, numFrames);
 				frameFile.close(); // close the frame output file to stop any bugs
 				Diffoutput.close();
+				Angleoutput.close();
 		}
 		//vector to store the runtimes of each Bonder call
 		vector<double> timing(0);
@@ -427,7 +458,7 @@ int main(int argc, char* argv[])
 			timing.push_back(time);								//push the data onto a vector for outputting to a file
 			cout << "Runtime of the Bonder call for the Frame: " << time << endl;		//print statement to show how long bonder takes each time
 		}
-		OutputTime(250, timing); //outputting the timings to a file
+		OutputTime(500, timing); //outputting the timings to a file
 	}
 	catch(std::bad_alloc& ba) //catch statement for any bad I/O errors
 	{
