@@ -110,7 +110,7 @@ void OutputDistancetoFile(vector<double> atomdist, int numFrames) //method to ou
 					cout << "30 long distance hydrogen bonds have been detected" << endl;
 					cout << "Do you want to Continue? (y/n)" << endl;//ask the user if they want to continue knowing that the bond is not well defined
 					cin >> distInput;
-					if(distInput.compare("n"))
+					if(distInput.compare("y"))
 					{
 						exit(0);
 						//if the answer is no kill the program if it is yes carry on.
@@ -333,8 +333,8 @@ int main(int argc, char* argv[])
 				pdbVec = readpdb();
 
 				//Open files to be used by the frame and difference output
-				frameFile.open ("Frames.txt");
-				Diffoutput.open("DiffOut.txt");
+				frameFile.open ("ProximityOutput.txt");
+				Diffoutput.open("DifferenceOut.txt");
 				Angleoutput.open("AngleOutput.txt");
 				// in this loop the coordinates are read frame by frame
 				for(int i=0; i < numFrames; i++)
